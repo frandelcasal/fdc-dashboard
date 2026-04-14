@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reporte de Campañas · FDC Digital</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Rubik:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    /* ── Tokens ─────────────────────────────────────────────── */
+    :root {
+      --ink:    #131B34;
+      --red:    #eb0000;
+      --yellow: #ffde59;
+      --paper:  #fdfbf7;
+      --muted:  #e8e3da;
+      --shadow: 4px 4px 0px 0px #131B34;
+      --shadow-lg: 6px 6px 0px 0px #131B34;
+    }
+
+    /* ── Base ────────────────────────────────────────────────── */
+    body {
+      background-color: var(--paper);
+      background-image: radial-gradient(#d8d2c8 1px, transparent 1px);
+      background-size: 24px 24px;
+      color: var(--ink);
+      font-family: 'Rubik', sans-serif;
+      font-size: 16px;
+    }
+    h1, h2, h3, .heading { font-family: 'Rubik', sans-serif; }
+
+    /* ── Wobbly borders ──────────────────────────────────────── */
+    .wobbly      { border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px; }
+    .wobbly-sm   { border-radius: 8px 32px 8px 32px / 32px 8px 32px 8px; }
+    .wobbly-pill { border-radius: 255px 12px 240px 12px / 12px 240px 12px 255px; }
+
+    /* ── Cards ───────────────────────────────────────────────── */
+    .card {
+      background: #fff;
+      border: 2px solid var(--ink);
+      box-shadow: var(--shadow);
+      border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    }
+    .card-sm {
+      background: #fff;
+      border: 2px solid var(--ink);
+      box-shadow: var(--shadow);
+      border-radius: 8px 32px 8px 32px / 32px 8px 32px 8px;
+    }
+
+    /* ── Pills ───────────────────────────────────────────────── */
+    .pill {
+      border: 2px solid var(--ink);
+      box-shadow: 2px 2px 0px 0px var(--ink);
+      border-radius: 255px 12px 240px 12px / 12px 240px 12px 255px;
+      cursor: pointer;
+      transition: all 0.1s;
+      font-family: 'Rubik', sans-serif;
+      color: var(--ink);
+      background: #fff;
+    }
+    .pill:hover {
+      transform: translate(1px, 1px);
+      box-shadow: 1px 1px 0px 0px var(--ink);
+    }
+    .pill.active {
+      background: var(--ink);
+      color: #fff;
+      box-shadow: 2px 2px 0px 0px var(--red);
+      border-color: var(--ink);
+    }
+    .pill.active:hover { transform: translate(1px,1px); box-shadow: 1px 1px 0px 0px var(--red); }
+
+    /* ── Metric values ───────────────────────────────────────── */
+    .metric-value { font-variant-numeric: tabular-nums; font-family: 'Rubik', sans-serif; }
+
+    /* ── Badges ──────────────────────────────────────────────── */
+    .badge-green { background: #d1fae5; color: #065f46; border: 1.5px solid #065f46; border-radius: 255px 8px 240px 8px / 8px 240px 8px 255px; }
+    .badge-red   { background: #fee2e2; color: var(--red); border: 1.5px solid var(--red); border-radius: 255px 8px 240px 8px / 8px 240px 8px 255px; }
+
+    /* ── Chart container ─────────────────────────────────────── */
+    #chart-container canvas { max-height: 280px; }
+
+    /* ── Table ───────────────────────────────────────────────── */
+    .sketch-divider { border-color: var(--muted); border-style: dashed; }
+
+    /* ── Buttons ─────────────────────────────────────────────── */
+    .btn-primary {
+      background: var(--ink);
+      color: #fff;
+      border: 2px solid var(--ink);
+      box-shadow: var(--shadow);
+      border-radius: 255px 12px 240px 12px / 12px 240px 12px 255px;
+      font-family: 'Rubik', sans-serif;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .btn-primary:hover { transform: translate(2px,2px); box-shadow: 2px 2px 0 0 var(--red); }
+    .btn-primary:active { transform: translate(4px,4px); box-shadow: none; }
+
+    .btn-secondary {
+      background: var(--paper);
+      color: var(--ink);
+      border: 2px solid var(--ink);
+      box-shadow: var(--shadow);
+      border-radius: 255px 12px 240px 12px / 12px 240px 12px 255px;
+      font-family: 'Rubik', sans-serif;
+      font-size: 0.875rem;
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    .btn-secondary:hover { transform: translate(2px,2px); box-shadow: 2px 2px 0 0 var(--ink); background: var(--yellow); }
+
+    /* ── Inputs ──────────────────────────────────────────────── */
+    .sketch-input {
+      background: #fff;
+      border: 2px solid var(--ink);
+      border-radius: 8px 32px 8px 32px / 32px 8px 32px 8px;
+      font-family: 'Rubik', sans-serif;
+      font-size: 0.9rem;
+      color: var(--ink);
+      outline: none;
+      transition: box-shadow 0.1s;
+    }
+    .sketch-input:focus { box-shadow: 3px 3px 0 0 var(--red); }
+    .sketch-input::placeholder { color: #a09890; }
+
+    /* ── Flatpickr light theme ───────────────────────────────── */
+    .flatpickr-calendar {
+      background: #fff !important;
+      border: 2px solid var(--ink) !important;
+      box-shadow: var(--shadow-lg) !important;
+      border-radius: 12px !important;
+      font-family: 'Rubik', sans-serif !important;
+      color: var(--ink) !important;
+    }
+    .flatpickr-month, .flatpickr-current-month, .flatpickr-monthDropdown-months,
+    .numInputWrapper input, .flatpickr-current-month input.cur-year {
+      background: transparent !important;
+      color: var(--ink) !important;
+      fill: var(--ink) !important;
+      font-family: 'Rubik', sans-serif !important;
+    }
+    .flatpickr-prev-month svg, .flatpickr-next-month svg { fill: var(--ink) !important; }
+    .flatpickr-weekday { color: #888 !important; font-size: 11px; }
+    .flatpickr-day { color: var(--ink) !important; border-radius: 6px !important; }
+    .flatpickr-day:hover { background: var(--muted) !important; border-color: var(--muted) !important; }
+    .flatpickr-day.selected, .flatpickr-day.startRange, .flatpickr-day.endRange {
+      background: var(--ink) !important;
+      border-color: var(--ink) !important;
+      color: #fff !important;
+    }
+    .flatpickr-day.inRange {
+      background: var(--muted) !important;
+      border-color: var(--muted) !important;
+      box-shadow: -5px 0 0 var(--muted), 5px 0 0 var(--muted) !important;
+    }
+    .flatpickr-day.today { border-color: var(--red) !important; }
+    .flatpickr-day.flatpickr-disabled, .flatpickr-day.prevMonthDay, .flatpickr-day.nextMonthDay { color: #ccc !important; }
+    .flatpickr-monthDropdown-months { border: none !important; }
+    .numInputWrapper:hover { background: transparent !important; }
+    .numInputWrapper span { border-color: var(--muted) !important; }
+    .flatpickr-input { cursor: pointer; }
+
+    /* ── ROAS colors ─────────────────────────────────────────── */
+    .roas-green  { color: #065f46; }
+    .roas-yellow { color: #92400e; }
+    .roas-red    { color: var(--red); }
+
+    /* ── Decorative dashed separator ─────────────────────────── */
+    .dashed-sep { border: none; border-top: 2px dashed var(--muted); margin: 2rem 0; }
+  </style>
+</head>
+<body class="min-h-screen p-6 md:p-10">
+
+  <!-- Login screen -->
+  <div id="login-screen" class="hidden min-h-screen flex items-center justify-center">
+    <div class="card p-8 w-full max-w-sm text-center" style="transform: rotate(-1deg)">
+      <div class="text-4xl mb-4">📊</div>
+      <h1 class="heading text-2xl mb-1">Reporte de Campañas</h1>
+      <p class="text-sm mb-6" style="color:#666">Ingresá tu código de acceso</p>
+      <input
+        id="account-input"
+        type="text"
+        placeholder="✏️ Código de acceso"
+        class="sketch-input w-full px-4 py-3 mb-3"
+      />
+      <p id="login-error" class="text-sm mb-3 hidden" style="color:var(--red)">❌ Código incorrecto. Revisá con tu agencia.</p>
+      <button id="login-btn" class="btn-primary w-full py-3">Ver reporte →</button>
+      <p class="text-xs mt-4" style="color:#aaa">FDC Digital</p>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  <div id="loading-screen" class="hidden min-h-screen flex items-center justify-center">
+    <div class="text-center">
+      <div class="text-4xl mb-4 animate-bounce">📈</div>
+      <p class="heading text-lg" style="color:#888">Cargando datos...</p>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div id="error-screen" class="hidden min-h-screen flex items-center justify-center">
+    <div class="text-center">
+      <div class="text-4xl mb-3">😬</div>
+      <p class="heading text-lg mb-1">No se pudieron cargar los datos</p>
+      <p id="error-msg" class="text-sm" style="color:#888"></p>
+    </div>
+  </div>
+
+  <!-- Dashboard -->
+  <div id="dashboard" class="hidden max-w-5xl mx-auto">
+
+    <!-- Header -->
+    <div class="flex items-start justify-between mb-8 gap-4 flex-wrap">
+      <div>
+        <img src="logo.png" alt="FDC Digital" style="height:36px; width:auto;" />
+        <h1 id="dashboard-title" class="heading text-4xl font-bold mt-3" style="color:var(--ink); font-weight:700; letter-spacing:-0.5px;">Reporte de Campañas 📊</h1>
+      </div>
+      <div class="card-sm px-4 py-2 text-right" style="transform:rotate(1deg)">
+        <p class="text-xs" style="color:#888">Última actualización</p>
+        <p id="last-update" class="font-bold text-sm" style="color:var(--ink)">—</p>
+      </div>
+    </div>
+
+    <!-- Period selector -->
+    <div class="flex gap-2 mb-4 flex-wrap items-center">
+      <button class="pill active px-4 py-1.5 text-sm" data-period="this_month">Este mes</button>
+      <button class="pill px-4 py-1.5 text-sm" data-period="last_month">Mes anterior</button>
+      <button class="pill px-4 py-1.5 text-sm" data-period="7">7 días</button>
+      <button class="pill px-4 py-1.5 text-sm" data-period="30">30 días</button>
+      <button class="pill px-4 py-1.5 text-sm" data-period="90">90 días</button>
+      <button class="pill px-4 py-1.5 text-sm" data-period="all">Todo</button>
+      <button class="pill px-4 py-1.5 text-sm" data-period="custom">✏️ Personalizado</button>
+    </div>
+    <!-- Custom date range -->
+    <div id="custom-range" style="display:none" class="gap-3 items-center mb-6 flex-wrap">
+      <div class="flex items-center gap-2">
+        <label class="text-sm" style="color:#888">Desde</label>
+        <input type="date" id="date-from" class="sketch-input px-3 py-1.5" />
+      </div>
+      <div class="flex items-center gap-2">
+        <label class="text-sm" style="color:#888">Hasta</label>
+        <input type="date" id="date-to" class="sketch-input px-3 py-1.5" />
+      </div>
+      <button id="apply-custom" class="btn-secondary px-4 py-1.5">Aplicar →</button>
+    </div>
+    <div class="mb-6"></div>
+
+    <!-- KPI Cards principales -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+
+      <div class="card p-6" style="transform:rotate(-0.5deg)">
+        <p class="text-xs uppercase tracking-wider font-bold mb-1" style="color:#888">💸 Importe Gastado</p>
+        <p id="kpi-spent" class="metric-value text-3xl font-bold mt-1" style="color:var(--ink)">—</p>
+        <div id="kpi-spent-target-row" class="hidden mt-2 flex items-center gap-2 flex-wrap">
+          <span class="text-xs" style="color:#888">Obj: <span id="kpi-spent-target"></span></span>
+          <span id="kpi-spent-diff" class="text-xs font-medium px-2 py-0.5"></span>
+        </div>
+        <p id="kpi-spent-sub" class="text-xs mt-1" style="color:#aaa">en el período</p>
+      </div>
+
+      <div class="card p-6" style="transform:rotate(0.5deg)">
+        <p class="text-xs uppercase tracking-wider font-bold mb-1" style="color:#888">🏆 Valor de Conversión</p>
+        <p id="kpi-conv" class="metric-value text-3xl font-bold mt-1" style="color:var(--ink)">—</p>
+        <div id="kpi-conv-target-row" class="hidden mt-2 flex items-center gap-2 flex-wrap">
+          <span class="text-xs" style="color:#888">Obj: <span id="kpi-conv-target"></span></span>
+          <span id="kpi-conv-diff" class="text-xs font-medium px-2 py-0.5"></span>
+        </div>
+        <p id="kpi-conv-sub" class="text-xs mt-1" style="color:#aaa">en ventas generadas</p>
+      </div>
+
+      <div class="card p-6" style="transform:rotate(-0.3deg)">
+        <p class="text-xs uppercase tracking-wider font-bold mb-1" style="color:#888">🎯 ROAS</p>
+        <p id="kpi-roas" class="metric-value text-3xl font-bold mt-1" style="color:var(--ink)">—</p>
+        <div id="kpi-roas-target-row" class="hidden mt-2 flex items-center gap-2 flex-wrap">
+          <span class="text-xs" style="color:#888">Obj: <span id="kpi-roas-target"></span></span>
+          <span id="kpi-roas-diff" class="text-xs font-medium px-2 py-0.5"></span>
+        </div>
+        <p id="kpi-roas-sub" class="text-xs mt-1" style="color:#aaa">retorno sobre inversión</p>
+      </div>
+
+    </div>
+
+    <!-- Chart -->
+    <div class="card p-6 mb-6" style="transform:rotate(0.2deg)">
+      <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <h2 class="heading text-xl" style="color:var(--ink)">📈 Evolución diaria</h2>
+        <div class="flex gap-4 text-sm" style="color:#888">
+          <span class="flex items-center gap-1.5">
+            <span class="inline-block w-3 h-3 rounded-full border-2" style="background:var(--ink);border-color:var(--ink)"></span>Gastado
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="inline-block w-3 h-3 rounded-full border-2" style="background:#16a34a;border-color:#16a34a"></span>Conversión
+          </span>
+        </div>
+      </div>
+      <div id="chart-container">
+        <canvas id="main-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Secondary KPIs -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+
+      <div class="card-sm p-5" style="transform:rotate(-0.8deg)">
+        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">📡 CPM</p>
+        <p id="kpi-cpm" class="metric-value text-2xl font-bold" style="color:var(--ink)">—</p>
+        <div id="kpi-cpm-vs" style="display:none" class="mt-2 flex items-center gap-1 flex-wrap">
+          <span class="text-xs" style="color:#aaa">Prom. agencia: <span id="kpi-cpm-agency"></span></span>
+          <span id="kpi-cpm-diff" class="text-xs font-medium px-1.5 py-0.5"></span>
+        </div>
+      </div>
+
+      <div class="card-sm p-5" style="transform:rotate(0.6deg)">
+        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">🪝 Tasa de gancho</p>
+        <p id="kpi-hook" class="metric-value text-2xl font-bold" style="color:var(--ink)">—</p>
+        <div id="kpi-hook-vs" style="display:none" class="mt-2 flex items-center gap-1 flex-wrap">
+          <span class="text-xs" style="color:#aaa">Prom. agencia: <span id="kpi-hook-agency"></span></span>
+          <span id="kpi-hook-diff" class="text-xs font-medium px-1.5 py-0.5"></span>
+        </div>
+      </div>
+
+      <div class="card-sm p-5" style="transform:rotate(-0.4deg)">
+        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">🖱️ CTR</p>
+        <p id="kpi-ctr" class="metric-value text-2xl font-bold" style="color:var(--ink)">—</p>
+        <div id="kpi-ctr-vs" style="display:none" class="mt-2 flex items-center gap-1 flex-wrap">
+          <span class="text-xs" style="color:#aaa">Prom. agencia: <span id="kpi-ctr-agency"></span></span>
+          <span id="kpi-ctr-diff" class="text-xs font-medium px-1.5 py-0.5"></span>
+        </div>
+      </div>
+
+      <div class="card-sm p-5" style="transform:rotate(0.9deg)">
+        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">🛒 Conv. web</p>
+        <p id="kpi-webconv" class="metric-value text-2xl font-bold" style="color:var(--ink)">—</p>
+        <div id="kpi-webconv-vs" style="display:none" class="mt-2 flex items-center gap-1 flex-wrap">
+          <span class="text-xs" style="color:#aaa">Prom. agencia: <span id="kpi-webconv-agency"></span></span>
+          <span id="kpi-webconv-diff" class="text-xs font-medium px-1.5 py-0.5"></span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ads section -->
+    <div class="card p-6" style="transform:rotate(-0.3deg)">
+      <h2 class="heading text-xl mb-5" style="color:var(--ink)">🏅 Anuncios con mayor inversión</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-xs uppercase tracking-wider" style="color:#aaa; border-bottom: 2px dashed var(--muted)">
+              <th class="text-left pb-3 font-normal">Anuncio</th>
+              <th class="text-right pb-3 font-normal">Gastado</th>
+              <th class="text-right pb-3 font-normal pl-6">Facturación</th>
+              <th class="text-right pb-3 font-normal pl-6">ROAS</th>
+              <th class="text-right pb-3 font-normal pl-6">Compras</th>
+              <th class="pb-3 pl-4"></th>
+            </tr>
+          </thead>
+          <tbody id="ads-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <p class="text-center text-xs mt-8" style="color:#bbb">✏️ Los datos se actualizan diariamente con información del día anterior · FDC Digital</p>
+  </div>
+
+  <script>
+    // ─── Config ───────────────────────────────────────────────────────────────
+    const SHEET_ID      = '1G7xKRi_xtTjzF86HUbz1vYwMy1kONA_ExNz1hQOXIWo';
+    const GID           = '55753471';
+    const TARGETS_GID   = '607751233';
+    const CLIENTS_GID   = '446878211';
+    const CSV_URL       = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
+    const TARGETS_URL   = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${TARGETS_GID}`;
+    const CLIENTS_URL   = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${CLIENTS_GID}`;
+
+    // ─── State ────────────────────────────────────────────────────────────────
+    let allRows     = [];
+    let agencyRows  = [];
+    let targetsRows = [];
+    let currentAccountId = null;
+    let currentPeriod = 'this_month';
+    let chart = null;
+
+    // ─── Helpers ──────────────────────────────────────────────────────────────
+    function parseNumber(str) {
+      if (!str) return 0;
+      // Handles "32987,09" → 32987.09 and "1,17" → 1.17
+      const clean = str.replace(/"/g, '').trim();
+      // If there's a dot AND a comma, dot is thousands separator
+      if (clean.includes('.') && clean.includes(',')) {
+        return parseFloat(clean.replace(/\./g, '').replace(',', '.')) || 0;
+      }
+      // If only comma, it's decimal separator
+      if (clean.includes(',') && !clean.includes('.')) {
+        return parseFloat(clean.replace(',', '.')) || 0;
+      }
+      return parseFloat(clean) || 0;
+    }
+
+    function fmtCurrency(n) {
+      return new Intl.NumberFormat('es-AR', {
+        style: 'currency', currency: 'ARS',
+        maximumFractionDigits: 0
+      }).format(n);
+    }
+
+    function parseTargetNumber(str) {
+      if (!str) return 0;
+      // In the targets sheet, dots are always thousands separators and comma is decimal
+      // e.g. "$3.600.000" → 3600000, "$1.200.000,0" → 1200000
+      const clean = str.replace(/[$\s]/g, '').trim();
+      return parseFloat(clean.replace(/\./g, '').replace(',', '.')) || 0;
+    }
+
+    function getTargetsForMonth(accountId, year, month) {
+      // month: 1-12, targets rows have "mes" like "01 ", "02 ", etc.
+      const monthStr = String(month).padStart(2, '0');
+      return targetsRows.find(r =>
+        r['cuenta publicitaria'] && r['cuenta publicitaria'].trim() === accountId &&
+        r['mes'] && r['mes'].trim() === monthStr
+      ) || null;
+    }
+
+    function getMonthForPeriod(period) {
+      const now = new Date();
+      if (period === 'this_month') return { year: now.getFullYear(), month: now.getMonth() + 1 };
+      if (period === 'last_month') {
+        const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        return { year: d.getFullYear(), month: d.getMonth() + 1 };
+      }
+      return null;
+    }
+
+    function fmtDiff(real, target) {
+      if (!target) return null;
+      const pct = ((real - target) / target) * 100;
+      const sign = pct >= 0 ? '+' : '';
+      return { text: `${sign}${pct.toFixed(1)}%`, positive: pct >= 0 };
+    }
+
+    function setKpiTarget(id, targetText, real, target) {
+      const row  = document.getElementById(`kpi-${id}-target-row`);
+      const tEl  = document.getElementById(`kpi-${id}-target`);
+      const dEl  = document.getElementById(`kpi-${id}-diff`);
+      if (!targetText) { row.classList.add('hidden'); return; }
+      row.classList.remove('hidden');
+      tEl.textContent = targetText;
+      const diff = fmtDiff(real, target);
+      if (diff) {
+        dEl.textContent = diff.text;
+        dEl.className = `text-xs font-medium px-2 py-0.5 ${
+          diff.positive ? 'badge-green' : 'badge-red'
+        }`;
+      } else {
+        dEl.textContent = '';
+      }
+    }
+
+    function roasColor(roas, target) {
+      if (!target) return '';
+      if (roas >= target)        return 'roas-green';
+      if (roas >= target * 0.75) return 'roas-yellow';
+      return 'roas-red';
+    }
+
+    function fmtRoas(n) {
+      return n === 0 ? '—' : n.toFixed(2) + 'x';
+    }
+
+    function addDays(date, days) {
+      const d = new Date(date);
+      d.setDate(d.getDate() + days);
+      return d;
+    }
+
+    function parseCSV(text) {
+      const lines = text.split('\n');
+      const headers = parseCSVLine(lines[0]);
+      const rows = [];
+      for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        const vals = parseCSVLine(lines[i]);
+        const row = {};
+        headers.forEach((h, idx) => { row[h.trim()] = (vals[idx] || '').trim(); });
+        rows.push(row);
+      }
+      return rows;
+    }
+
+    function parseCSVLine(line) {
+      const result = [];
+      let cur = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const ch = line[i];
+        if (ch === '"') {
+          inQuotes = !inQuotes;
+        } else if (ch === ',' && !inQuotes) {
+          result.push(cur);
+          cur = '';
+        } else {
+          cur += ch;
+        }
+      }
+      result.push(cur);
+      return result;
+    }
+
+    function filterByPeriod(rows, period) {
+      if (period === 'all') return rows;
+      if (period === 'custom') {
+        const from = document.getElementById('date-from').value;
+        const to   = document.getElementById('date-to').value;
+        if (!from && !to) return rows;
+        return rows.filter(r => {
+          const d = r['Date'];
+          if (!d) return false;
+          if (from && d < from) return false;
+          if (to   && d > to)   return false;
+          return true;
+        });
+      }
+      if (period === 'this_month') {
+        const now = new Date();
+        const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        return rows.filter(r => r['Date'] && r['Date'].startsWith(prefix));
+      }
+      if (period === 'last_month') {
+        const now = new Date();
+        const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const prefix = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        return rows.filter(r => r['Date'] && r['Date'].startsWith(prefix));
+      }
+      const dates = rows.map(r => new Date(r['Date'])).filter(d => !isNaN(d));
+      if (!dates.length) return rows;
+      const maxDate = new Date(Math.max(...dates));
+      const cutoff = new Date(maxDate);
+      cutoff.setDate(cutoff.getDate() - (period - 1));
+      return rows.filter(r => {
+        const d = new Date(r['Date']);
+        return !isNaN(d) && d >= cutoff;
+      });
+    }
+
+    function aggregateByDate(rows) {
+      const byDate = {};
+      rows.forEach(r => {
+        const d = r['Date'];
+        if (!d) return;
+        if (!byDate[d]) byDate[d] = { spent: 0, conv: 0 };
+        byDate[d].spent += parseNumber(r['Amount Spent']);
+        byDate[d].conv  += parseNumber(r['Website Purchases Conversion Value']);
+      });
+      return Object.entries(byDate)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([date, v]) => ({ date, ...v }));
+    }
+
+    function aggregateByAd(rows) {
+      const byAd = {};
+      rows.forEach(r => {
+        const name = r['Ad Name'] || 'Sin nombre';
+        const link = r['Ad Creative Instagram Permalink'] || '';
+        if (!byAd[name]) byAd[name] = { name, link, spent: 0, conv: 0, purchases: 0 };
+        byAd[name].spent     += parseNumber(r['Amount Spent']);
+        byAd[name].conv      += parseNumber(r['Website Purchases Conversion Value']);
+        byAd[name].purchases += parseNumber(r['Website Purchases']);
+        if (!byAd[name].link && link) byAd[name].link = link;
+      });
+      return Object.values(byAd)
+        .map(v => ({ ...v, roas: v.spent > 0 ? v.conv / v.spent : 0 }))
+        .sort((a, b) => b.spent - a.spent)
+        .slice(0, 6);
+    }
+
+    // ─── Render ───────────────────────────────────────────────────────────────
+    function render(rows) {
+      const filtered = filterByPeriod(rows, currentPeriod);
+
+      // KPIs
+      const totalSpent       = filtered.reduce((s, r) => s + parseNumber(r['Amount Spent']), 0);
+      const totalConv        = filtered.reduce((s, r) => s + parseNumber(r['Website Purchases Conversion Value']), 0);
+      const totalImpressions = filtered.reduce((s, r) => s + parseNumber(r['Impressions']), 0);
+      const total3sViews     = filtered.reduce((s, r) => s + parseNumber(r['3 Seconds Video View']), 0);
+      const totalClicks      = filtered.reduce((s, r) => s + parseNumber(r['Inline Link Clicks']), 0);
+      const totalPurchases   = filtered.reduce((s, r) => s + parseNumber(r['Website Purchases']), 0);
+      const totalLPViews     = filtered.reduce((s, r) => s + parseNumber(r['Landing Page Views']), 0);
+      const roas = totalSpent > 0 ? totalConv / totalSpent : 0;
+
+      const cpm     = totalImpressions > 0 ? (totalSpent / totalImpressions) * 1000 : 0;
+      const hook    = totalImpressions > 0 ? (total3sViews / totalImpressions) * 100 : 0;
+      const ctr     = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+      const webconv = totalLPViews > 0     ? (totalPurchases / totalLPViews) * 100 : 0;
+
+      document.getElementById('kpi-spent').textContent   = fmtCurrency(totalSpent);
+      document.getElementById('kpi-conv').textContent    = fmtCurrency(totalConv);
+      document.getElementById('kpi-roas').textContent    = fmtRoas(roas);
+      document.getElementById('kpi-cpm').textContent     = cpm > 0     ? fmtCurrency(cpm)        : '—';
+      document.getElementById('kpi-hook').textContent    = hook > 0    ? hook.toFixed(1) + '%'    : '—';
+      document.getElementById('kpi-ctr').textContent     = ctr > 0     ? ctr.toFixed(2) + '%'     : '—';
+      document.getElementById('kpi-webconv').textContent = webconv > 0 ? webconv.toFixed(2) + '%' : '—';
+
+      // Agency benchmarks
+      const agFiltered   = filterByPeriod(agencyRows, currentPeriod);
+      const agImpr       = agFiltered.reduce((s, r) => s + parseNumber(r['Impressions']), 0);
+      const agSpent      = agFiltered.reduce((s, r) => s + parseNumber(r['Amount Spent']), 0);
+      const ag3s         = agFiltered.reduce((s, r) => s + parseNumber(r['3 Seconds Video View']), 0);
+      const agClicks     = agFiltered.reduce((s, r) => s + parseNumber(r['Inline Link Clicks']), 0);
+      const agPurchases  = agFiltered.reduce((s, r) => s + parseNumber(r['Website Purchases']), 0);
+      const agLPViews    = agFiltered.reduce((s, r) => s + parseNumber(r['Landing Page Views']), 0);
+      const agCpm        = agImpr > 0    ? (agSpent / agImpr) * 1000       : 0;
+      const agHook       = agImpr > 0    ? (ag3s / agImpr) * 100           : 0;
+      const agCtr        = agImpr > 0    ? (agClicks / agImpr) * 100       : 0;
+      const agWebconv    = agLPViews > 0 ? (agPurchases / agLPViews) * 100 : 0;
+
+      function setVs(id, clientVal, agencyVal, fmtFn, higherIsBetter = true) {
+        const vsEl     = document.getElementById(`kpi-${id}-vs`);
+        const agencyEl = document.getElementById(`kpi-${id}-agency`);
+        const diffEl   = document.getElementById(`kpi-${id}-diff`);
+        if (!clientVal || !agencyVal) { vsEl.style.display = 'none'; return; }
+        vsEl.style.display = 'flex';
+        agencyEl.textContent = fmtFn(agencyVal);
+        const pct  = ((clientVal - agencyVal) / agencyVal) * 100;
+        const sign = pct >= 0 ? '+' : '';
+        const positive = higherIsBetter ? pct >= 0 : pct <= 0;
+        diffEl.textContent = `${sign}${pct.toFixed(1)}%`;
+        diffEl.className = `text-xs font-medium px-1.5 py-0.5 ${positive ? 'badge-green' : 'badge-red'}`;
+      }
+
+      setVs('cpm',     cpm,     agCpm,     v => fmtCurrency(v), false); // lower CPM is better
+      setVs('hook',    hook,    agHook,    v => v.toFixed(1) + '%');
+      setVs('ctr',     ctr,     agCtr,     v => v.toFixed(2) + '%');
+      setVs('webconv', webconv, agWebconv, v => v.toFixed(2) + '%');
+
+      // Targets (only for monthly periods) + ROAS color
+      const roasEl = document.getElementById('kpi-roas');
+      const monthInfo = getMonthForPeriod(currentPeriod);
+      let tRoas = 0;
+      if (monthInfo && currentAccountId) {
+        const t = getTargetsForMonth(currentAccountId, monthInfo.year, monthInfo.month);
+        if (t) {
+          const tConv  = parseTargetNumber(t['facturación obj']);
+          const tSpent = parseTargetNumber(t['inversión obj']);
+          tRoas        = parseNumber(t['ROAS objetivo']);
+          setKpiTarget('conv',  tConv  ? fmtCurrency(tConv)  : null, totalConv,  tConv);
+          setKpiTarget('spent', tSpent ? fmtCurrency(tSpent) : null, totalSpent, tSpent);
+          setKpiTarget('roas',  tRoas  ? tRoas.toFixed(2)+'x': null, roas,       tRoas);
+        } else {
+          ['conv','spent','roas'].forEach(id =>
+            document.getElementById(`kpi-${id}-target-row`).classList.add('hidden')
+          );
+        }
+      } else {
+        ['conv','spent','roas'].forEach(id =>
+          document.getElementById(`kpi-${id}-target-row`).classList.add('hidden')
+        );
+      }
+      roasEl.className = 'metric-value text-3xl font-semibold ' + roasColor(roas, tRoas);
+
+      // Chart
+      const daily = aggregateByDate(filtered);
+      const labels = daily.map(d => d.date);
+      const spentData = daily.map(d => d.spent);
+      const convData  = daily.map(d => d.conv);
+
+      if (chart) chart.destroy();
+      chart = new Chart(document.getElementById('main-chart'), {
+        type: 'line',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'Gastado',
+              data: spentData,
+              borderColor: '#131B34',
+              backgroundColor: 'rgba(19,27,52,0.06)',
+              borderWidth: 2,
+              pointRadius: labels.length > 30 ? 0 : 3,
+              pointHoverRadius: 5,
+              fill: true,
+              tension: 0.3,
+            },
+            {
+              label: 'Conversión',
+              data: convData,
+              borderColor: '#16a34a',
+              backgroundColor: 'rgba(22,163,74,0.05)',
+              borderWidth: 2,
+              pointRadius: labels.length > 30 ? 0 : 3,
+              pointHoverRadius: 5,
+              fill: true,
+              tension: 0.3,
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: true,
+          interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: '#fff',
+              borderColor: '#131B34',
+              borderWidth: 2,
+              titleColor: '#888',
+              bodyColor: '#131B34',
+              padding: 12,
+              callbacks: {
+                label: ctx => `  ${ctx.dataset.label}: ${fmtCurrency(ctx.parsed.y)}`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: '#e8e3da' },
+              ticks: {
+                color: '#aaa',
+                maxTicksLimit: 8,
+                maxRotation: 0,
+                font: { size: 11, family: 'Patrick Hand' }
+              }
+            },
+            y: {
+              grid: { color: '#e8e3da' },
+              ticks: {
+                color: '#aaa',
+                font: { size: 11, family: 'Patrick Hand' },
+                callback: v => fmtCurrency(v)
+              }
+            }
+          }
+        }
+      });
+
+      // Ads table
+      const ads = aggregateByAd(filtered);
+      document.getElementById('ads-table').innerHTML = ads.map((a, i) => `
+        <tr style="border-top: 2px dashed #e8e3da; ${i === 0 ? 'border-top:none' : ''}">
+          <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">${a.name}</td>
+          <td class="py-3 text-right tabular-nums" style="color:#555">${fmtCurrency(a.spent)}</td>
+          <td class="py-3 text-right tabular-nums pl-6" style="color:#555">${fmtCurrency(a.conv)}</td>
+          <td class="py-3 text-right tabular-nums pl-6 font-bold ${roasColor(a.roas, tRoas)}">${fmtRoas(a.roas)}</td>
+          <td class="py-3 text-right tabular-nums pl-6" style="color:#555">${a.purchases > 0 ? a.purchases : '—'}</td>
+          <td class="py-3 pl-4 text-right">
+            ${a.link ? `<a href="${a.link}" target="_blank" rel="noopener" style="color:#bbb" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#bbb'" title="Ver anuncio">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>` : ''}
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // ─── Data loading ─────────────────────────────────────────────────────────
+    async function loadData(accountId) {
+      show('loading-screen');
+      try {
+        const [resMain, resTargets, resClients] = await Promise.all([
+          fetch(CSV_URL),
+          fetch(TARGETS_URL),
+          fetch(CLIENTS_URL)
+        ]);
+        if (!resMain.ok) throw new Error(`HTTP ${resMain.status}`);
+
+        const [textMain, textTargets, textClients] = await Promise.all([
+          resMain.text(),
+          resTargets.ok ? resTargets.text() : Promise.resolve(''),
+          resClients.ok ? resClients.text() : Promise.resolve('')
+        ]);
+
+        const rows = parseCSV(textMain);
+        agencyRows = rows.filter(r => r['Account ID'] && r['Account ID'].trim());
+        allRows    = agencyRows.filter(r => r['Account ID'].trim() === accountId);
+
+        if (allRows.length === 0) {
+          show('login-screen');
+          document.getElementById('login-error').classList.remove('hidden');
+          document.getElementById('login-error').textContent = 'No se encontraron datos para ese código.';
+          return;
+        }
+
+        // Parse targets (skip first summary row)
+        if (textTargets) {
+          const targetLines = textTargets.trim().split('\n');
+          targetsRows = parseCSV(targetLines.slice(1).join('\n'));
+        }
+
+        currentAccountId = accountId;
+
+        // Client name
+        if (textClients) {
+          const clientRows = parseCSV(textClients);
+          const match = clientRows.find(r => r['cuenta publicitaria'] && r['cuenta publicitaria'].trim() === accountId);
+          if (match) {
+            const name = match['cliente'] || '';
+            const formatted = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+            document.getElementById('dashboard-title').textContent = `Reporte de Campañas — ${formatted} 📊`;
+          }
+        }
+
+        // Last update date
+        const dates = allRows.map(r => r['Date']).filter(Boolean).sort();
+        if (dates.length) {
+          const [y, m, day] = dates[dates.length - 1].split('-').map(Number);
+          const d = new Date(y, m - 1, day); // local time, no UTC conversion
+          document.getElementById('last-update').textContent =
+            d.toLocaleDateString('es-AR', { day: 'numeric', month: 'long', year: 'numeric' });
+        }
+
+        show('dashboard');
+        render(allRows);
+
+      } catch (err) {
+        document.getElementById('error-msg').textContent = err.message;
+        show('error-screen');
+      }
+    }
+
+    function show(id) {
+      ['login-screen','loading-screen','error-screen','dashboard'].forEach(s => {
+        document.getElementById(s).classList.toggle('hidden', s !== id);
+      });
+    }
+
+    // ─── Init ─────────────────────────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
+      // Flatpickr instances
+      const fpFrom = flatpickr('#date-from', {
+        dateFormat: 'Y-m-d',
+        locale: { firstDayOfWeek: 1 },
+        allowInput: true,
+      });
+      const fpTo = flatpickr('#date-to', {
+        dateFormat: 'Y-m-d',
+        locale: { firstDayOfWeek: 1 },
+        allowInput: true,
+        onChange: ([date]) => {
+          if (date) fpFrom.set('maxDate', date);
+        },
+      });
+      fpFrom.config.onChange.push(([date]) => {
+        if (date) fpTo.set('minDate', date);
+      });
+
+      // Period buttons
+      const customRange = document.getElementById('custom-range');
+      document.querySelectorAll('[data-period]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.querySelectorAll('[data-period]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          const p = btn.dataset.period;
+          if (p === 'custom') {
+            customRange.style.display = 'flex';
+          } else {
+            customRange.style.display = 'none';
+            currentPeriod = p;
+            render(allRows);
+          }
+        });
+      });
+
+      // Apply custom range
+      document.getElementById('apply-custom').addEventListener('click', () => {
+        currentPeriod = 'custom';
+        render(allRows);
+      });
+
+      // Login button
+      document.getElementById('login-btn').addEventListener('click', () => {
+        const val = document.getElementById('account-input').value.trim();
+        if (val) loadData(val);
+      });
+      document.getElementById('account-input').addEventListener('keydown', e => {
+        if (e.key === 'Enter') document.getElementById('login-btn').click();
+      });
+
+      // Check URL param
+      const params = new URLSearchParams(window.location.search);
+      const account = params.get('account');
+      if (account) {
+        loadData(account);
+      } else {
+        show('login-screen');
+      }
+    });
+  </script>
+</body>
+</html>
