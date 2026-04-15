@@ -290,6 +290,7 @@
               <th class="sort-th text-right pb-3 font-normal cursor-pointer select-none" data-col="delta">
                 Delta <span class="sort-icon">↓</span>
               </th>
+              <th class="pb-3 pl-4"></th>
             </tr>
           </thead>
           <tbody id="accounts-tbody"></tbody>
@@ -925,6 +926,13 @@
               ${d !== null
                 ? `<span class="text-xs font-medium px-2 py-0.5 ${d >= 0 ? 'badge-green' : 'badge-red'}">${d >= 0 ? '+' : ''}${d.toFixed(1)}%</span>`
                 : '<span class="text-xs" style="color:#ccc">—</span>'}
+            </td>
+            <td class="py-3 pl-4 text-right">
+              <a href="index.html?account=${a.accountId}" target="_blank" rel="noopener"
+                style="color:#bbb" title="Ver reporte"
+                onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='#bbb'">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
             </td>
           </tr>`;
       }).join('');
