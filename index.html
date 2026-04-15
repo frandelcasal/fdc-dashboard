@@ -253,6 +253,11 @@
     <div class="mb-6"></div>
 
     <!-- KPI Cards principales -->
+    <div id="currency-notice" class="hidden mb-4">
+      <span class="text-xs px-3 py-1.5 card-sm inline-flex items-center gap-1.5" style="color:#888">
+        💱 Valores convertidos a ARS · <span id="currency-label"></span>
+      </span>
+    </div>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
 
       <div class="card p-6" style="transform:rotate(-0.5deg)">
@@ -373,7 +378,7 @@
     // ─── Config ───────────────────────────────────────────────────────────────
     const SHEET_ID      = '1G7xKRi_xtTjzF86HUbz1vYwMy1kONA_ExNz1hQOXIWo';
     const GID           = '55753471';
-    const TARGETS_GID   = '607751233';
+    const TARGETS_GID   = '360010815';
     const CLIENTS_GID   = '446878211';
     const CSV_URL       = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
     const TARGETS_URL   = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${TARGETS_GID}`;
@@ -419,12 +424,15 @@
     }
 
     function getTargetsForMonth(accountId, year, month) {
-      // month: 1-12, targets rows have "mes" like "01 ", "02 ", etc.
-      const monthStr = String(month).padStart(2, '0');
-      return targetsRows.find(r =>
-        r['cuenta publicitaria'] && r['cuenta publicitaria'].trim() === accountId &&
-        r['mes'] && r['mes'].trim() === monthStr
-      ) || null;
+      // Acepta mes como número (1-12), "01"/"02", o "ene"/"feb"/etc.
+      const monthNames = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+      const monthNum = String(month).padStart(2, '0');
+      const monthName = monthNames[month - 1];
+      return targetsRows.find(r => {
+        if (!r['cuenta publicitaria'] || r['cuenta publicitaria'].trim() !== accountId) return false;
+        const m = (r['mes'] || '').trim().toLowerCase();
+        return m === monthNum || m === monthName;
+      }) || null;
     }
 
     function getMonthForPeriod(period) {
@@ -562,7 +570,7 @@
         .map(([date, v]) => ({ date, ...v }));
     }
 
-    function aggregateByAd(rows) {
+    function aggregateByAd(rows, rate = 1) {
       const byAd = {};
       rows.forEach(r => {
         const name = r['Ad Name'] || 'Sin nombre';
@@ -574,7 +582,7 @@
         if (!byAd[name].link && link) byAd[name].link = link;
       });
       return Object.values(byAd)
-        .map(v => ({ ...v, roas: v.spent > 0 ? v.conv / v.spent : 0 }))
+        .map(v => ({ ...v, roas: v.spent > 0 ? v.conv / v.spent : 0, spent: v.spent * rate, conv: v.conv * rate }))
         .sort((a, b) => b.spent - a.spent)
         .slice(0, 6);
     }
@@ -583,9 +591,23 @@
     function render(rows) {
       const filtered = filterByPeriod(rows, currentPeriod);
 
+      // ─── Tipo de cambio ───────────────────────────────────────────────────────
+      let exchangeRate = 1;
+      let moneda = 'ARS';
+      if (currentAccountId) {
+        const mInfo = getMonthForPeriod(currentPeriod) ||
+          (() => { const n = new Date(); return { year: n.getFullYear(), month: n.getMonth() + 1 }; })();
+        const tEx = getTargetsForMonth(currentAccountId, mInfo.year, mInfo.month);
+        if (tEx) {
+          moneda = (tEx['moneda'] || 'ARS').trim().toUpperCase();
+          const rate = parseTargetNumber(tEx['tipo de cambio']);
+          if (rate > 0) exchangeRate = rate;
+        }
+      }
+
       // KPIs
-      const totalSpent       = filtered.reduce((s, r) => s + parseNumber(r['Amount Spent']), 0);
-      const totalConv        = filtered.reduce((s, r) => s + parseNumber(r['Website Purchases Conversion Value']), 0);
+      const totalSpent       = filtered.reduce((s, r) => s + parseNumber(r['Amount Spent']), 0) * exchangeRate;
+      const totalConv        = filtered.reduce((s, r) => s + parseNumber(r['Website Purchases Conversion Value']), 0) * exchangeRate;
       const totalImpressions = filtered.reduce((s, r) => s + parseNumber(r['Impressions']), 0);
       const total3sViews     = filtered.reduce((s, r) => s + parseNumber(r['3 Seconds Video View']), 0);
       const totalClicks      = filtered.reduce((s, r) => s + parseNumber(r['Inline Link Clicks']), 0);
@@ -645,9 +667,9 @@
       if (monthInfo && currentAccountId) {
         const t = getTargetsForMonth(currentAccountId, monthInfo.year, monthInfo.month);
         if (t) {
-          const tConv  = parseTargetNumber(t['facturación obj']);
-          const tSpent = parseTargetNumber(t['inversión obj']);
-          tRoas        = parseNumber(t['ROAS objetivo']);
+          const tConv  = parseTargetNumber(t['facturacion obj'] || t['facturación obj']) * exchangeRate;
+          const tSpent = parseTargetNumber(t['inversion obj']  || t['inversión obj'])   * exchangeRate;
+          tRoas        = parseNumber(t['roas obj'] || t['ROAS objetivo']);
           setKpiTarget('conv',  tConv  ? fmtCurrency(tConv)  : null, totalConv,  tConv);
           setKpiTarget('spent', tSpent ? fmtCurrency(tSpent) : null, totalSpent, tSpent);
           setKpiTarget('roas',  tRoas  ? tRoas.toFixed(2)+'x': null, roas,       tRoas);
@@ -663,11 +685,21 @@
       }
       roasEl.className = 'metric-value text-3xl font-semibold ' + roasColor(roas, tRoas);
 
+      // Currency notice
+      const notice = document.getElementById('currency-notice');
+      if (moneda !== 'ARS' && exchangeRate !== 1) {
+        document.getElementById('currency-label').textContent =
+          `1 ${moneda} = ${fmtCurrency(exchangeRate)}`;
+        notice.classList.remove('hidden');
+      } else {
+        notice.classList.add('hidden');
+      }
+
       // Chart
       const daily = aggregateByDate(filtered);
       const labels = daily.map(d => d.date);
-      const spentData = daily.map(d => d.spent);
-      const convData  = daily.map(d => d.conv);
+      const spentData = daily.map(d => d.spent * exchangeRate);
+      const convData  = daily.map(d => d.conv * exchangeRate);
 
       if (chart) chart.destroy();
       chart = new Chart(document.getElementById('main-chart'), {
@@ -740,7 +772,7 @@
       });
 
       // Ads table
-      const ads = aggregateByAd(filtered);
+      const ads = aggregateByAd(filtered, exchangeRate);
       document.getElementById('ads-table').innerHTML = ads.map((a, i) => `
         <tr style="border-top: 2px dashed #e8e3da; ${i === 0 ? 'border-top:none' : ''}">
           <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">${a.name}</td>
@@ -785,10 +817,9 @@
           return;
         }
 
-        // Parse targets (skip first summary row)
+        // Parse targets (nueva pestaña tiene header en fila 1, sin fila resumen)
         if (textTargets) {
-          const targetLines = textTargets.trim().split('\n');
-          targetsRows = parseCSV(targetLines.slice(1).join('\n'));
+          targetsRows = parseCSV(textTargets);
         }
 
         currentAccountId = accountId;
