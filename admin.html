@@ -8,6 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
   <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     /* ── Tokens ─────────────────────────────────────────────── */
@@ -337,6 +338,7 @@
     let clientsMap      = {}; // accountId → display name
     let noSalesAccounts = new Set(); // cuentas marcadas como "sin ventas" en el sheet
     let accountIds  = [];
+    let fetchWarnings = []; // sheets que fallaron al cargar
     let currentPeriod  = 'this_month';
     let currentAccount = 'all';
     let roasChart       = null;
@@ -916,6 +918,19 @@
       const section = document.getElementById('alerts-section');
       let html = '';
 
+      if (fetchWarnings.length > 0) {
+        html += `
+          <div class="alert-warn p-4">
+            <div class="flex items-start gap-3">
+              <span class="text-lg">⚠️</span>
+              <div>
+                <p class="text-sm font-semibold mb-1" style="color:#92400e">Error al cargar datos del Sheet</p>
+                <p class="text-xs" style="color:#888">No se pudieron cargar: <strong>${fetchWarnings.join(' y ')}</strong>. Los deltas y alertas pueden estar incompletos. <button onclick="sessionStorage.clear();location.reload()" class="underline font-medium" style="color:#92400e">Reintentar</button></p>
+              </div>
+            </div>
+          </div>`;
+      }
+
       if (noSales.length > 0) {
         const chips = noSales.map(a =>
           `<span class="alert-chip-danger">${a.name} · ${a.days} día${a.days !== 1 ? 's' : ''}</span>`
@@ -1059,11 +1074,18 @@
     // ─── Data loading ─────────────────────────────────────────────────────────
     async function loadData() {
       try {
-        const [textMain, textTargets, textClients] = await Promise.all([
-          fetchWithCache(CSV_URL),
-          fetchWithCache(TARGETS_URL).catch(() => ''),
-          fetchWithCache(CLIENTS_URL).catch(() => ''),
+        const textMain = await fetchWithCache(CSV_URL);
+        const [resTargets, resClients] = await Promise.all([
+          fetchSafe(TARGETS_URL),
+          fetchSafe(CLIENTS_URL),
         ]);
+
+        fetchWarnings = [];
+        if (resTargets.failed) fetchWarnings.push('objetivos');
+        if (resClients.failed) fetchWarnings.push('clientes');
+
+        const textTargets = resTargets.data;
+        const textClients = resClients.data;
 
         allRows = parseCSV(textMain).filter(r => r['Account ID'] && r['Account ID'].trim());
         validateColumns(parseCSVLine(textMain.split('\n')[0]));

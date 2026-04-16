@@ -88,32 +88,25 @@ function roasColor(roas, target) {
   return 'roas-red';
 }
 
-// ─── CSV Parser ───────────────────────────────────────────────────────────────
+// ─── CSV Parser (Papa Parse) ──────────────────────────────────────────────────
 function parseCSV(text) {
-  const lines = text.split('\n');
-  const headers = parseCSVLine(lines[0]);
-  const rows = [];
-  for (let i = 1; i < lines.length; i++) {
-    if (!lines[i].trim()) continue;
-    const vals = parseCSVLine(lines[i]);
-    const row = {};
-    headers.forEach((h, idx) => { row[h.trim()] = (vals[idx] || '').trim(); });
-    rows.push(row);
-  }
-  return rows;
+  const result = Papa.parse(text.trim(), { header: true, skipEmptyLines: true });
+  return result.data;
 }
 
 function parseCSVLine(line) {
-  const result = [];
-  let cur = '', inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') { inQuotes = !inQuotes; }
-    else if (ch === ',' && !inQuotes) { result.push(cur); cur = ''; }
-    else { cur += ch; }
+  const result = Papa.parse(line);
+  return result.data[0] || [];
+}
+
+// ─── Fetch seguro (con aviso de error) ───────────────────────────────────────
+async function fetchSafe(url) {
+  try {
+    return { data: await fetchWithCache(url), failed: false };
+  } catch (e) {
+    console.error(`fetchSafe: error al cargar ${url}`, e);
+    return { data: '', failed: true };
   }
-  result.push(cur);
-  return result;
 }
 
 // ─── Filtro de período ────────────────────────────────────────────────────────
