@@ -328,16 +328,8 @@
     <p class="text-center text-xs mt-8" style="color:#bbb">✏️ Los datos se actualizan diariamente con información del día anterior · FDC Digital</p>
   </div>
 
+  <script src="shared.js"></script>
   <script>
-    // ─── Config ───────────────────────────────────────────────────────────────
-    const SHEET_ID    = '1G7xKRi_xtTjzF86HUbz1vYwMy1kONA_ExNz1hQOXIWo';
-    const GID         = '55753471';
-    const TARGETS_GID = '360010815';
-    const CLIENTS_GID = '446878211';
-    const CSV_URL     = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
-    const TARGETS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${TARGETS_GID}`;
-    const CLIENTS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${CLIENTS_GID}`;
-
     // ─── Specialist param ──────────────────────────────────────────────────────
     const SPECIALIST_FILTER = new URLSearchParams(location.search).get('name') || '';
     const SPECIALIST_DISPLAY = SPECIALIST_FILTER
@@ -365,118 +357,6 @@
     function closeDropdown() {
       document.getElementById('account-dropdown').classList.add('hidden');
       document.getElementById('btn-select-arrow').style.transform = 'rotate(0deg)';
-    }
-
-    // ─── Helpers ──────────────────────────────────────────────────────────────
-    function parseNumber(str) {
-      if (!str) return 0;
-      const clean = str.replace(/"/g, '').trim();
-      if (clean.includes('.') && clean.includes(','))
-        return parseFloat(clean.replace(/\./g, '').replace(',', '.')) || 0;
-      if (clean.includes(',') && !clean.includes('.'))
-        return parseFloat(clean.replace(',', '.')) || 0;
-      return parseFloat(clean) || 0;
-    }
-
-    function parseTargetNumber(str) {
-      if (!str) return 0;
-      const clean = str.replace(/[$\s]/g, '').trim();
-      return parseFloat(clean.replace(/\./g, '').replace(',', '.')) || 0;
-    }
-
-    function fmtRoas(n) {
-      return (!n || n === 0) ? '—' : n.toFixed(2) + 'x';
-    }
-
-    function roasColor(roas, target) {
-      if (!target) return '';
-      if (roas >= target)        return 'roas-green';
-      if (roas >= target * 0.75) return 'roas-yellow';
-      return 'roas-red';
-    }
-
-    function parseCSV(text) {
-      const lines = text.split('\n');
-      const headers = parseCSVLine(lines[0]);
-      const rows = [];
-      for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue;
-        const vals = parseCSVLine(lines[i]);
-        const row = {};
-        headers.forEach((h, idx) => { row[h.trim()] = (vals[idx] || '').trim(); });
-        rows.push(row);
-      }
-      return rows;
-    }
-
-    function parseCSVLine(line) {
-      const result = [];
-      let cur = '', inQuotes = false;
-      for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (ch === '"') { inQuotes = !inQuotes; }
-        else if (ch === ',' && !inQuotes) { result.push(cur); cur = ''; }
-        else { cur += ch; }
-      }
-      result.push(cur);
-      return result;
-    }
-
-    function filterByPeriod(rows, period) {
-      if (period === 'all') return rows;
-      if (period === 'custom') {
-        const from = document.getElementById('date-from').value;
-        const to   = document.getElementById('date-to').value;
-        if (!from && !to) return rows;
-        return rows.filter(r => {
-          const d = r['Date'];
-          if (!d) return false;
-          if (from && d < from) return false;
-          if (to   && d > to)   return false;
-          return true;
-        });
-      }
-      if (period === 'this_month') {
-        const now = new Date();
-        const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-        return rows.filter(r => r['Date'] && r['Date'].startsWith(prefix));
-      }
-      if (period === 'last_month') {
-        const now = new Date();
-        const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        const prefix = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-        return rows.filter(r => r['Date'] && r['Date'].startsWith(prefix));
-      }
-      const dates = rows.map(r => new Date(r['Date'])).filter(d => !isNaN(d));
-      if (!dates.length) return rows;
-      const maxDate = new Date(Math.max(...dates));
-      const cutoff  = new Date(maxDate);
-      cutoff.setDate(cutoff.getDate() - (period - 1));
-      return rows.filter(r => {
-        const d = new Date(r['Date']);
-        return !isNaN(d) && d >= cutoff;
-      });
-    }
-
-    function getMonthForPeriod(period) {
-      const now = new Date();
-      if (period === 'this_month') return { year: now.getFullYear(), month: now.getMonth() + 1 };
-      if (period === 'last_month') {
-        const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-        return { year: d.getFullYear(), month: d.getMonth() + 1 };
-      }
-      return null;
-    }
-
-    function getTargetsForMonth(accountId, year, month) {
-      const monthNames = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
-      const monthNum  = String(month).padStart(2, '0');
-      const monthName = monthNames[month - 1];
-      return targetsRows.find(r => {
-        if (!r['cuenta publicitaria'] || r['cuenta publicitaria'].trim() !== accountId) return false;
-        const m = (r['mes'] || '').trim().toLowerCase();
-        return m === monthNum || m === monthName;
-      }) || null;
     }
 
     // ─── Per-account stats ────────────────────────────────────────────────────
@@ -687,7 +567,10 @@
             <div class="flex items-start gap-3">
               <span class="text-lg">⚠️</span>
               <div>
-                <p class="text-sm font-semibold mb-1" style="color:#92400e">Sin objetivo definido</p>
+                <div class="flex items-center gap-3 mb-1">
+                  <p class="text-sm font-semibold" style="color:#92400e">Sin objetivo definido</p>
+                  <a href="https://docs.google.com/spreadsheets/d/1G7xKRi_xtTjzF86HUbz1vYwMy1kONA_ExNz1hQOXIWo/edit#gid=360010815" target="_blank" rel="noopener" class="text-xs font-medium px-2 py-0.5 alert-chip-warn" style="text-decoration:none">✏️ Cargar objetivos →</a>
+                </div>
                 <p class="text-xs mb-2" style="color:#888">No se incluyen en el delta ni en el gráfico histórico.</p>
                 <div class="flex flex-wrap gap-2">${chips}</div>
               </div>
@@ -771,7 +654,7 @@
       }
 
       // ── Alertas ───────────────────────────────────────────────────────────
-      const noObj   = withData.filter(s => s.roasObj === 0);
+      const noObj   = withData.filter(s => s.roasObj === 0 && !noSalesAccounts.has(s.accountId));
       const noSales = computeNoSalesAlerts(filtered);
       renderAlerts({ noObj, noSales });
 
@@ -787,18 +670,14 @@
       }
 
       try {
-        const [resMain, resTargets, resClients] = await Promise.all([
-          fetch(CSV_URL), fetch(TARGETS_URL), fetch(CLIENTS_URL)
-        ]);
-        if (!resMain.ok) throw new Error(`HTTP ${resMain.status}`);
-
         const [textMain, textTargets, textClients] = await Promise.all([
-          resMain.text(),
-          resTargets.ok ? resTargets.text() : Promise.resolve(''),
-          resClients.ok ? resClients.text() : Promise.resolve('')
+          fetchWithCache(CSV_URL),
+          fetchWithCache(TARGETS_URL).catch(() => ''),
+          fetchWithCache(CLIENTS_URL).catch(() => ''),
         ]);
 
         const rawRows = parseCSV(textMain).filter(r => r['Account ID'] && r['Account ID'].trim());
+        validateColumns(parseCSVLine(textMain.split('\n')[0]));
         agencyRows = rawRows; // todas las cuentas para promedios de agencia
 
         if (textTargets) targetsRows = parseCSV(textTargets);
