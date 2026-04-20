@@ -310,6 +310,24 @@
       </div>
     </div>
 
+    <!-- Resultados por objetivo de campaña -->
+    <div class="card p-6 mb-6" style="transform:rotate(-0.2deg)">
+      <h2 class="heading text-xl mb-5" style="color:var(--ink)">🎯 Resultados por objetivo de campaña</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-xs uppercase tracking-wider" style="color:#aaa; border-bottom: 2px dashed var(--muted)">
+              <th class="text-left pb-3 font-normal">Objetivo</th>
+              <th class="text-right pb-3 font-normal">Importe gastado</th>
+              <th class="text-right pb-3 font-normal pl-6">Facturación</th>
+              <th class="text-right pb-3 font-normal pl-6">ROAS</th>
+            </tr>
+          </thead>
+          <tbody id="by-objective-table"></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- Secondary KPIs -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
 
@@ -663,12 +681,12 @@
       // Targets (only for monthly periods) + ROAS color
       const roasEl = document.getElementById('kpi-roas');
       const monthInfo = getMonthForPeriod(currentPeriod);
-      let tRoas = 0;
+      let tRoas = 0; let tConv = 0; let tSpent = 0;
       if (monthInfo && currentAccountId) {
         const t = getTargetsForMonth(currentAccountId, monthInfo.year, monthInfo.month);
         if (t) {
-          const tConv  = parseTargetNumber(t['facturacion obj'] || t['facturación obj']) * exchangeRate;
-          const tSpent = parseTargetNumber(t['inversion obj']  || t['inversión obj'])   * exchangeRate;
+          tConv  = parseTargetNumber(t['facturacion obj'] || t['facturación obj']) * exchangeRate;
+          tSpent = parseTargetNumber(t['inversion obj']  || t['inversión obj'])   * exchangeRate;
           tRoas        = parseNumber(t['roas obj'] || t['ROAS objetivo']);
           setKpiTarget('conv',  tConv  ? fmtCurrency(tConv)  : null, totalConv,  tConv);
           setKpiTarget('spent', tSpent ? fmtCurrency(tSpent) : null, totalSpent, tSpent);
@@ -773,6 +791,59 @@
 
       // Ads table
       const ads = aggregateByAd(filtered, exchangeRate);
+      // Resultados por objetivo de campaña
+      const salesRows  = filtered.filter(r => (r['Campaign Objective'] || '').trim() === 'OUTCOME_SALES');
+      const otherRows  = filtered.filter(r => (r['Campaign Objective'] || '').trim() !== 'OUTCOME_SALES');
+
+      function calcGroup(rows) {
+        const spent = rows.reduce((s, r) => s + parseNumber(r['Amount Spent']), 0) * exchangeRate;
+        const conv  = rows.reduce((s, r) => s + parseNumber(r['Website Purchases Conversion Value']), 0) * exchangeRate;
+        const roas  = spent > 0 ? conv / spent : 0;
+        return { spent, conv, roas };
+      }
+
+      const sales = calcGroup(salesRows);
+      const other = calcGroup(otherRows);
+
+      const roasDiffHtml = (roas, target) => {
+        if (!target) return '<span style="color:#bbb">—</span>';
+        const pct = ((roas - target) / target) * 100;
+        const sign = pct >= 0 ? '+' : '';
+        const cls = pct >= 0 ? 'badge-green' : (pct >= -25 ? '' : 'badge-red');
+        const style = (!cls) ? 'background:#fef3c7;color:#92400e;border:1.5px solid #92400e;border-radius:255px 8px 240px 8px / 8px 240px 8px 255px;' : '';
+        return `<span class="text-xs font-medium px-2 py-0.5 ${cls}" style="${style}">${sign}${pct.toFixed(1)}%</span>`;
+      };
+
+      function pctBadge(real, target) {
+        if (!target) return '';
+        const pct = ((real - target) / target) * 100;
+        const sign = pct >= 0 ? '+' : '';
+        const cls = pct >= 0 ? 'badge-green' : (pct >= -25 ? '' : 'badge-red');
+        const style = !cls ? 'background:#fef3c7;color:#92400e;border:1.5px solid #92400e;border-radius:255px 8px 240px 8px / 8px 240px 8px 255px;' : '';
+        return `<span class="text-xs font-medium px-1.5 py-0.5 ml-1.5 ${cls}" style="${style}">${sign}${pct.toFixed(1)}%</span>`;
+      }
+
+      document.getElementById('by-objective-table').innerHTML = `
+        <tr>
+          <td class="py-3 pr-4 font-medium" style="color:var(--ink)">🛍️ Ventas</td>
+          <td class="py-3 text-right tabular-nums" style="color:#555">
+            ${sales.spent > 0 ? fmtCurrency(sales.spent) : '—'}${pctBadge(sales.spent, tSpent)}
+          </td>
+          <td class="py-3 text-right tabular-nums pl-6" style="color:#555">
+            ${sales.conv > 0 ? fmtCurrency(sales.conv) : '—'}${pctBadge(sales.conv, tConv)}
+          </td>
+          <td class="py-3 text-right tabular-nums pl-6 font-bold ${roasColor(sales.roas, tRoas)}">
+            ${sales.roas > 0 ? fmtRoas(sales.roas) : '—'}${pctBadge(sales.roas, tRoas)}
+          </td>
+        </tr>
+        <tr style="border-top: 2px dashed #e8e3da">
+          <td class="py-3 pr-4 font-medium" style="color:var(--ink)">📣 Otros objetivos</td>
+          <td class="py-3 text-right tabular-nums" style="color:#555">${other.spent > 0 ? fmtCurrency(other.spent) : '—'}</td>
+          <td class="py-3 text-right tabular-nums pl-6" style="color:#555">${other.conv > 0 ? fmtCurrency(other.conv) : '—'}</td>
+          <td class="py-3 text-right tabular-nums pl-6 font-bold">${other.roas > 0 ? fmtRoas(other.roas) : '—'}</td>
+        </tr>
+      `;
+
       document.getElementById('ads-table').innerHTML = ads.map((a, i) => `
         <tr style="border-top: 2px dashed #e8e3da; ${i === 0 ? 'border-top:none' : ''}">
           <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">${a.name}</td>
