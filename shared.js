@@ -1,11 +1,10 @@
 // ─── Config ───────────────────────────────────────────────────────────────────
-const SHEET_ID    = '1G7xKRi_xtTjzF86HUbz1vYwMy1kONA_ExNz1hQOXIWo';
 const GID         = '55753471';
 const TARGETS_GID = '360010815';
 const CLIENTS_GID = '446878211';
-const CSV_URL     = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
-const TARGETS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${TARGETS_GID}`;
-const CLIENTS_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${CLIENTS_GID}`;
+const CSV_URL     = `/api/sheet?gid=${GID}`;
+const TARGETS_URL = `/api/sheet?gid=${TARGETS_GID}`;
+const CLIENTS_URL = `/api/sheet?gid=${CLIENTS_GID}`;
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutos en ms
 
