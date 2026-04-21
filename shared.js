@@ -2,9 +2,29 @@
 const GID         = '55753471';
 const TARGETS_GID = '360010815';
 const CLIENTS_GID = '446878211';
-const CSV_URL     = `/api/sheet?gid=${GID}`;
-const TARGETS_URL = `/api/sheet?gid=${TARGETS_GID}`;
-const CLIENTS_URL = `/api/sheet?gid=${CLIENTS_GID}`;
+const BATCH_URL   = '/api/sheets';
+
+// ─── Fetch batch (trae las 3 pestañas en una sola llamada) ────────────────────
+async function fetchAllSheets() {
+  const key = 'fdc_cache_all_sheets';
+  try {
+    const cached = sessionStorage.getItem(key);
+    if (cached) {
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp < CACHE_TTL) return data;
+    }
+  } catch (e) {}
+
+  const res = await fetch(BATCH_URL);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+
+  try {
+    sessionStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() }));
+  } catch (e) {}
+
+  return data;
+}
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutos en ms
 

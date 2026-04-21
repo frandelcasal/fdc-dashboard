@@ -420,12 +420,23 @@
 
   <script>
     // ─── Config ───────────────────────────────────────────────────────────────
-    const GID         = '55753471';
-    const TARGETS_GID = '360010815';
-    const CLIENTS_GID = '446878211';
-    const CSV_URL     = `/api/sheet?gid=${GID}`;
-    const TARGETS_URL = `/api/sheet?gid=${TARGETS_GID}`;
-    const CLIENTS_URL = `/api/sheet?gid=${CLIENTS_GID}`;
+    const CACHE_TTL = 5 * 60 * 1000;
+
+    async function fetchAllSheets() {
+      const key = 'fdc_cache_all_sheets';
+      try {
+        const cached = sessionStorage.getItem(key);
+        if (cached) {
+          const { data, timestamp } = JSON.parse(cached);
+          if (Date.now() - timestamp < CACHE_TTL) return data;
+        }
+      } catch (e) {}
+      const res = await fetch('/api/sheets');
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      try { sessionStorage.setItem(key, JSON.stringify({ data, timestamp: Date.now() })); } catch (e) {}
+      return data;
+    }
 
     // ─── State ────────────────────────────────────────────────────────────────
     let allRows     = [];
@@ -897,18 +908,7 @@
     async function loadData(accountId) {
       show('loading-screen');
       try {
-        const [resMain, resTargets, resClients] = await Promise.all([
-          fetch(CSV_URL),
-          fetch(TARGETS_URL),
-          fetch(CLIENTS_URL)
-        ]);
-        if (!resMain.ok) throw new Error(`HTTP ${resMain.status}`);
-
-        const [textMain, textTargets, textClients] = await Promise.all([
-          resMain.text(),
-          resTargets.ok ? resTargets.text() : Promise.resolve(''),
-          resClients.ok ? resClients.text() : Promise.resolve('')
-        ]);
+        const { main: textMain, targets: textTargets, clients: textClients } = await fetchAllSheets();
 
         const rows = parseCSV(textMain);
         agencyRows = rows.filter(r => r['Account ID'] && r['Account ID'].trim());

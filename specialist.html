@@ -697,18 +697,8 @@
       }
 
       try {
-        const textMain = await fetchWithCache(CSV_URL);
-        const [resTargets, resClients] = await Promise.all([
-          fetchSafe(TARGETS_URL),
-          fetchSafe(CLIENTS_URL),
-        ]);
-
+        const { main: textMain, targets: textTargets, clients: textClients } = await fetchAllSheets();
         fetchWarnings = [];
-        if (resTargets.failed) fetchWarnings.push('objetivos');
-        if (resClients.failed) fetchWarnings.push('clientes');
-
-        const textTargets = resTargets.data;
-        const textClients = resClients.data;
 
         const rawRows = parseCSV(textMain).filter(r => r['Account ID'] && r['Account ID'].trim());
         validateColumns(parseCSVLine(textMain.split('\n')[0]));
