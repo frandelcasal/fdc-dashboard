@@ -2,11 +2,21 @@ const { google } = require('googleapis');
 
 const SHEET_ID = '1G7xKRi_xtTjzF86HUbz1vYwMy1kONA_ExNz1hQOXIWo';
 
+// Nombres de pestañas por GID — evita una llamada extra a la API
+const SHEET_NAMES = {
+  '55753471':  'Datos crudos',
+  '360010815': 'objetivos-dashboard',
+  '446878211': 'Clientes',
+};
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   const { gid } = req.query;
   if (!gid) return res.status(400).json({ error: 'Falta el parámetro gid' });
+
+  const sheetName = SHEET_NAMES[String(gid)];
+  if (!sheetName) return res.status(404).json({ error: `GID desconocido: ${gid}` });
 
   try {
     const auth = new google.auth.GoogleAuth({
@@ -19,14 +29,7 @@ export default async function handler(req, res) {
 
     const sheets = google.sheets({ version: 'v4', auth });
 
-    // Buscar el nombre de la pestaña por su GID
-    const meta = await sheets.spreadsheets.get({ spreadsheetId: SHEET_ID });
-    const sheet = meta.data.sheets.find(s => String(s.properties.sheetId) === String(gid));
-    if (!sheet) return res.status(404).json({ error: `No se encontró la pestaña con gid=${gid}` });
-
-    const sheetName = sheet.properties.title;
-
-    // Traer los datos
+    // Traer los datos directamente (sin lookup de metadata)
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId: SHEET_ID,
       range: sheetName,
