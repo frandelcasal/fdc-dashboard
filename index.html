@@ -420,7 +420,12 @@
 
   <script>
     // ─── Config ───────────────────────────────────────────────────────────────
-    // URLs definidas en shared.js
+    const GID         = '55753471';
+    const TARGETS_GID = '360010815';
+    const CLIENTS_GID = '446878211';
+    const CSV_URL     = `/api/sheet?gid=${GID}`;
+    const TARGETS_URL = `/api/sheet?gid=${TARGETS_GID}`;
+    const CLIENTS_URL = `/api/sheet?gid=${CLIENTS_GID}`;
 
     // ─── State ────────────────────────────────────────────────────────────────
     let allRows     = [];
