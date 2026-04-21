@@ -364,15 +364,14 @@
     // ─── Per-account stats ────────────────────────────────────────────────────
     function computeAccountStats(accountId, filteredRows) {
       const rows      = filteredRows.filter(r => r['Account ID'] && r['Account ID'].trim() === accountId);
-      const spent     = rows.reduce((s, r) => s + parseNumber(r['Amount Spent']), 0);
-      const conv      = rows.reduce((s, r) => s + parseNumber(r['Website Purchases Conversion Value']), 0);
-      const roas      = spent > 0 ? conv / spent : 0;
+      const rawSpent  = rows.reduce((s, r) => s + parseNumber(r['Amount Spent']), 0);
+      const rawConv   = rows.reduce((s, r) => s + parseNumber(r['Website Purchases Conversion Value']), 0);
       const impr      = rows.reduce((s, r) => s + parseNumber(r['Impressions']), 0);
       const views3s   = rows.reduce((s, r) => s + parseNumber(r['3 Seconds Video View']), 0);
       const clicks    = rows.reduce((s, r) => s + parseNumber(r['Inline Link Clicks']), 0);
       const purchases = rows.reduce((s, r) => s + parseNumber(r['Website Purchases']), 0);
       const lpviews   = rows.reduce((s, r) => s + parseNumber(r['Landing Page Views']), 0);
-      const cpm     = impr > 0    ? (spent / impr) * 1000       : 0;
+      const cpm     = impr > 0    ? (rawSpent / impr) * 1000    : 0;
       const hook    = impr > 0    ? (views3s / impr) * 100      : 0;
       const ctr     = impr > 0    ? (clicks / impr) * 100       : 0;
       const webconv = lpviews > 0 ? (purchases / lpviews) * 100 : 0;
@@ -381,6 +380,8 @@
       let spentObj   = 0;
       let convObj    = 0;
       let specialist = '—';
+      let exchangeRate = 1;
+      let moneda       = 'ARS';
       const monthInfo = getMonthForPeriod(currentPeriod);
       if (monthInfo) {
         const t = getTargetsForMonth(accountId, monthInfo.year, monthInfo.month);
@@ -389,11 +390,22 @@
           spentObj   = parseTargetNumber(t['inversion obj'] || t['inversion objetivo'] || '');
           convObj    = parseTargetNumber(t['facturacion obj'] || t['facturacion objetivo'] || '');
           specialist = (t['especialista'] || '').trim() || '—';
+          // ── Conversión de moneda ──
+          moneda = (t['moneda'] || 'ARS').trim().toUpperCase();
+          const rate = parseTargetNumber(t['tipo de cambio'] || '');
+          if (rate > 0) exchangeRate = rate;
         }
       }
 
+      // Aplicar tipo de cambio a valores monetarios (ROAS no se convierte, es ratio)
+      const spent   = rawSpent * exchangeRate;
+      const conv    = rawConv  * exchangeRate;
+      const roas    = rawSpent > 0 ? rawConv / rawSpent : 0; // ratio: no necesita conversión
+      spentObj      = spentObj * exchangeRate;
+      convObj       = convObj  * exchangeRate;
+
       const name = clientsMap[accountId] || accountId;
-      return { accountId, name, specialist, spent, conv, roas, roasObj, spentObj, convObj, cpm, hook, ctr, webconv };
+      return { accountId, name, specialist, spent, conv, roas, roasObj, spentObj, convObj, cpm, hook, ctr, webconv, moneda, exchangeRate };
     }
 
 
@@ -434,7 +446,7 @@
       const sorted = sortData(data, sortCol, sortDir);
       document.getElementById('accounts-tbody-1').innerHTML = sorted.map((a, i) => `
         <tr style="border-top: 2px dashed var(--muted); ${i === 0 ? 'border-top:none' : ''}">
-          <td class="py-3 pr-6 font-semibold whitespace-nowrap" style="color:var(--ink)">${a.name}</td>
+          <td class="py-3 pr-6 font-semibold whitespace-nowrap" style="color:var(--ink)">${a.name}${a.moneda && a.moneda !== 'ARS' ? ` <span class="text-xs font-normal" style="color:#aaa" title="Valores convertidos a ARS · 1 ${a.moneda} = $${a.exchangeRate}">💱</span>` : ''}</td>
           <td class="py-3 pr-4 text-right">
             <div class="flex items-center justify-end gap-2">
               <span class="tabular-nums font-bold" style="color:var(--ink)">${fmtMoney(a.spent)}</span>

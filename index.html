@@ -252,79 +252,69 @@
     </div>
     <div class="mb-6"></div>
 
-    <!-- KPI Cards principales -->
+    <!-- Números clave -->
     <div id="currency-notice" class="hidden mb-4">
       <span class="text-xs px-3 py-1.5 card-sm inline-flex items-center gap-1.5" style="color:#888">
         💱 Valores convertidos a ARS · <span id="currency-label"></span>
       </span>
     </div>
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+    <div class="card p-6 mb-6" style="transform:rotate(-0.3deg)">
+      <h2 class="heading text-xl mb-5" style="color:var(--ink)">📊 Números clave</h2>
+      <div class="flex flex-col gap-0">
 
-      <div class="card p-6" style="transform:rotate(-0.5deg)">
-        <p class="text-xs uppercase tracking-wider font-bold mb-1" style="color:#888">💸 Importe Gastado</p>
-        <p id="kpi-spent" class="metric-value text-3xl font-bold mt-1" style="color:var(--ink)">—</p>
-        <div id="kpi-spent-target-row" class="hidden mt-2 flex items-center gap-2 flex-wrap">
-          <span class="text-xs" style="color:#888">Obj: <span id="kpi-spent-target"></span></span>
-          <span id="kpi-spent-diff" class="text-xs font-medium px-2 py-0.5"></span>
+        <div class="flex items-center justify-between py-3" style="border-bottom: 1.5px dashed var(--muted)">
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium" style="color:var(--ink)">💸 Inversión</span>
+            <span id="kpi-spent" class="metric-value font-bold" style="color:var(--ink)">—</span>
+          </div>
+          <div id="kpi-spent-target-row" class="hidden flex items-center gap-1">
+            <span class="text-xs" style="color:#bbb">Obj: <span id="kpi-spent-target"></span></span>
+            <span id="kpi-spent-diff" class="text-xs font-medium px-1.5 py-0.5"></span>
+          </div>
         </div>
-        <p id="kpi-spent-sub" class="text-xs mt-1" style="color:#aaa">en el período</p>
-      </div>
 
-      <div class="card p-6" style="transform:rotate(0.5deg)">
-        <p class="text-xs uppercase tracking-wider font-bold mb-1" style="color:#888">🏆 Valor de Conversión</p>
-        <p id="kpi-conv" class="metric-value text-3xl font-bold mt-1" style="color:var(--ink)">—</p>
-        <div id="kpi-conv-target-row" class="hidden mt-2 flex items-center gap-2 flex-wrap">
-          <span class="text-xs" style="color:#888">Obj: <span id="kpi-conv-target"></span></span>
-          <span id="kpi-conv-diff" class="text-xs font-medium px-2 py-0.5"></span>
+        <div class="flex items-center justify-between py-3" style="border-bottom: 1.5px dashed var(--muted)">
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium" style="color:var(--ink)">🏆 Facturación</span>
+            <span id="kpi-conv" class="metric-value font-bold" style="color:var(--ink)">—</span>
+          </div>
+          <div id="kpi-conv-target-row" class="hidden flex items-center gap-1">
+            <span class="text-xs" style="color:#bbb">Obj: <span id="kpi-conv-target"></span></span>
+            <span id="kpi-conv-diff" class="text-xs font-medium px-1.5 py-0.5"></span>
+          </div>
         </div>
-        <p id="kpi-conv-sub" class="text-xs mt-1" style="color:#aaa">en ventas generadas</p>
-      </div>
 
-      <div class="card p-6" style="transform:rotate(-0.3deg)">
-        <p class="text-xs uppercase tracking-wider font-bold mb-1" style="color:#888">🎯 ROAS</p>
-        <p id="kpi-roas" class="metric-value text-3xl font-bold mt-1" style="color:var(--ink)">—</p>
-        <div id="kpi-roas-target-row" class="hidden mt-2 flex items-center gap-2 flex-wrap">
-          <span class="text-xs" style="color:#888">Obj: <span id="kpi-roas-target"></span></span>
-          <span id="kpi-roas-diff" class="text-xs font-medium px-2 py-0.5"></span>
+        <div class="flex items-center justify-between py-3" style="border-bottom: 1.5px dashed var(--muted)">
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium" style="color:var(--ink)">🎯 ROAS</span>
+            <span id="kpi-roas" class="metric-value font-bold" style="color:var(--ink)">—</span>
+          </div>
+          <div id="kpi-roas-target-row" class="hidden flex items-center gap-1">
+            <span class="text-xs" style="color:#bbb">Obj: <span id="kpi-roas-target"></span></span>
+            <span id="kpi-roas-diff" class="text-xs font-medium px-1.5 py-0.5"></span>
+          </div>
         </div>
-        <p id="kpi-roas-sub" class="text-xs mt-1" style="color:#aaa">retorno sobre inversión</p>
-      </div>
 
-    </div>
-
-    <!-- Chart -->
-    <div class="card p-6 mb-6" style="transform:rotate(0.2deg)">
-      <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
-        <h2 class="heading text-xl" style="color:var(--ink)">📈 Evolución diaria</h2>
-        <div class="flex gap-4 text-sm" style="color:#888">
-          <span class="flex items-center gap-1.5">
-            <span class="inline-block w-3 h-3 rounded-full border-2" style="background:var(--ink);border-color:var(--ink)"></span>Gastado
-          </span>
-          <span class="flex items-center gap-1.5">
-            <span class="inline-block w-3 h-3 rounded-full border-2" style="background:#16a34a;border-color:#16a34a"></span>Conversión
-          </span>
+        <div class="flex items-center py-3" style="border-bottom: 1.5px dashed var(--muted); gap: 0.75rem">
+          <span class="text-sm font-medium" style="color:var(--ink)">📉 Inv / Fc</span>
+          <span id="kpi-invfc" class="metric-value font-bold" style="color:var(--ink)">—</span>
         </div>
-      </div>
-      <div id="chart-container">
-        <canvas id="main-chart"></canvas>
-      </div>
-    </div>
 
-    <!-- Resultados por objetivo de campaña -->
-    <div class="card p-6 mb-6" style="transform:rotate(-0.2deg)">
-      <h2 class="heading text-xl mb-5" style="color:var(--ink)">🎯 Resultados por objetivo de campaña</h2>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="text-xs uppercase tracking-wider" style="color:#aaa; border-bottom: 2px dashed var(--muted)">
-              <th class="text-left pb-3 font-normal">Objetivo</th>
-              <th class="text-right pb-3 font-normal">Importe gastado</th>
-              <th class="text-right pb-3 font-normal pl-6">Facturación</th>
-              <th class="text-right pb-3 font-normal pl-6">ROAS</th>
-            </tr>
-          </thead>
-          <tbody id="by-objective-table"></tbody>
-        </table>
+        <div class="flex items-center py-3" style="border-bottom: 1.5px dashed var(--muted); gap: 0.75rem">
+          <span class="text-sm font-medium" style="color:var(--ink)">🛍️ Ventas</span>
+          <span id="kpi-purchases" class="metric-value font-bold" style="color:var(--ink)">—</span>
+        </div>
+
+        <div class="flex items-center py-3" style="border-bottom: 1.5px dashed var(--muted); gap: 0.75rem">
+          <span class="text-sm font-medium" style="color:var(--ink)">🎫 Ticket promedio</span>
+          <span id="kpi-ticket" class="metric-value font-bold" style="color:var(--ink)">—</span>
+        </div>
+
+        <div class="flex items-center py-3" style="gap: 0.75rem">
+          <span class="text-sm font-medium" style="color:var(--ink)">💰 CPA</span>
+          <span id="kpi-cpa" class="metric-value font-bold" style="color:var(--ink)">—</span>
+        </div>
+
       </div>
     </div>
 
@@ -370,7 +360,7 @@
     </div>
 
     <!-- Ads section -->
-    <div class="card p-6" style="transform:rotate(-0.3deg)">
+    <div class="card p-6 mb-6" style="transform:rotate(-0.3deg)">
       <h2 class="heading text-xl mb-5" style="color:var(--ink)">🏅 Anuncios con mayor inversión</h2>
       <div class="overflow-x-auto">
         <table class="w-full text-sm">
@@ -385,6 +375,42 @@
             </tr>
           </thead>
           <tbody id="ads-table"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="card p-6 mb-6" style="transform:rotate(0.2deg)">
+      <div class="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <h2 class="heading text-xl" style="color:var(--ink)">📈 Evolución diaria</h2>
+        <div class="flex gap-4 text-sm" style="color:#888">
+          <span class="flex items-center gap-1.5">
+            <span class="inline-block w-3 h-3 rounded-full border-2" style="background:var(--ink);border-color:var(--ink)"></span>Gastado
+          </span>
+          <span class="flex items-center gap-1.5">
+            <span class="inline-block w-3 h-3 rounded-full border-2" style="background:#16a34a;border-color:#16a34a"></span>Conversión
+          </span>
+        </div>
+      </div>
+      <div id="chart-container">
+        <canvas id="main-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Resultados por objetivo de campaña -->
+    <div class="card p-6 mb-6" style="transform:rotate(-0.2deg)">
+      <h2 class="heading text-xl mb-5" style="color:var(--ink)">🎯 Resultados por objetivo de campaña</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-xs uppercase tracking-wider" style="color:#aaa; border-bottom: 2px dashed var(--muted)">
+              <th class="text-left pb-3 font-normal">Objetivo</th>
+              <th class="text-right pb-3 font-normal">Importe gastado</th>
+              <th class="text-right pb-3 font-normal pl-6">Facturación</th>
+              <th class="text-right pb-3 font-normal pl-6">ROAS</th>
+            </tr>
+          </thead>
+          <tbody id="by-objective-table"></tbody>
         </table>
       </div>
     </div>
@@ -638,13 +664,21 @@
       const ctr     = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
       const webconv = totalLPViews > 0     ? (totalPurchases / totalLPViews) * 100 : 0;
 
-      document.getElementById('kpi-spent').textContent   = fmtCurrency(totalSpent);
-      document.getElementById('kpi-conv').textContent    = fmtCurrency(totalConv);
-      document.getElementById('kpi-roas').textContent    = fmtRoas(roas);
-      document.getElementById('kpi-cpm').textContent     = cpm > 0     ? fmtCurrency(cpm)        : '—';
-      document.getElementById('kpi-hook').textContent    = hook > 0    ? hook.toFixed(1) + '%'    : '—';
-      document.getElementById('kpi-ctr').textContent     = ctr > 0     ? ctr.toFixed(2) + '%'     : '—';
-      document.getElementById('kpi-webconv').textContent = webconv > 0 ? webconv.toFixed(2) + '%' : '—';
+      const cpa    = totalPurchases > 0 ? totalSpent / totalPurchases : 0;
+      const ticket = totalPurchases > 0 ? totalConv  / totalPurchases : 0;
+      const invfc  = totalConv > 0      ? (totalSpent / totalConv) * 100 : 0;
+
+      document.getElementById('kpi-spent').textContent     = fmtCurrency(totalSpent);
+      document.getElementById('kpi-conv').textContent      = fmtCurrency(totalConv);
+      document.getElementById('kpi-roas').textContent      = fmtRoas(roas);
+      document.getElementById('kpi-purchases').textContent = totalPurchases > 0 ? totalPurchases.toLocaleString('es-AR') : '—';
+      document.getElementById('kpi-ticket').textContent    = ticket > 0 ? fmtCurrency(ticket) : '—';
+      document.getElementById('kpi-cpa').textContent       = cpa > 0    ? fmtCurrency(cpa)    : '—';
+      document.getElementById('kpi-invfc').textContent     = invfc > 0  ? invfc.toFixed(1) + '%' : '—';
+      document.getElementById('kpi-cpm').textContent       = cpm > 0     ? fmtCurrency(cpm)        : '—';
+      document.getElementById('kpi-hook').textContent      = hook > 0    ? hook.toFixed(1) + '%'    : '—';
+      document.getElementById('kpi-ctr').textContent       = ctr > 0     ? ctr.toFixed(2) + '%'     : '—';
+      document.getElementById('kpi-webconv').textContent   = webconv > 0 ? webconv.toFixed(2) + '%' : '—';
 
       // Agency benchmarks
       const agFiltered   = filterByPeriod(agencyRows, currentPeriod);
@@ -701,7 +735,7 @@
           document.getElementById(`kpi-${id}-target-row`).classList.add('hidden')
         );
       }
-      roasEl.className = 'metric-value text-3xl font-semibold ' + roasColor(roas, tRoas);
+      roasEl.className = 'metric-value font-bold ' + roasColor(roas, tRoas);
 
       // Currency notice
       const notice = document.getElementById('currency-notice');
