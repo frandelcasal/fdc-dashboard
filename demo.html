@@ -92,15 +92,15 @@
     <div class="flex items-start justify-between mb-8 gap-4 flex-wrap">
       <div>
         <img src="logo.png" alt="FDC Digital" style="height:36px; width:auto;" />
-        <h1 class="heading text-4xl font-bold mt-3" style="color:var(--ink); font-weight:700; letter-spacing:-0.5px;">Reporte de Campañas — Tienda Ejemplo 📊</h1>
+        <h1 class="heading text-4xl font-bold mt-3" style="color:var(--ink); font-weight:700; letter-spacing:-0.5px;">Marca Ejemplo 📊</h1>
       </div>
       <div class="card-sm px-4 py-2 text-right" style="transform:rotate(1deg)">
         <p class="text-xs" style="color:#888">Última actualización</p>
-        <p class="font-bold text-sm" style="color:var(--ink)">13 de abril de 2026</p>
+        <p class="font-bold text-sm" style="color:var(--ink)">26 de abril de 2026</p>
       </div>
     </div>
 
-    <!-- Period selector (decorative, no lógica) -->
+    <!-- Period selector -->
     <div class="flex gap-2 mb-8 flex-wrap items-center">
       <button class="pill active px-4 py-1.5 text-sm">Este mes</button>
       <button class="pill px-4 py-1.5 text-sm">Mes anterior</button>
@@ -111,39 +111,183 @@
       <button class="pill px-4 py-1.5 text-sm">✏️ Personalizado</button>
     </div>
 
-    <!-- KPI Cards principales -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-6">
+    <!-- Números clave -->
+    <div class="card p-6 mb-6" style="transform:rotate(-0.3deg)">
+      <h2 class="heading text-xl mb-5" style="color:var(--ink)">📊 Números clave</h2>
+      <div class="flex flex-col gap-0">
 
-      <div class="card p-6" style="transform:rotate(-0.5deg)">
-        <p class="text-xs uppercase tracking-wider font-bold mb-1" style="color:#888">💸 Importe Gastado</p>
-        <p class="metric-value text-3xl font-bold mt-1" style="color:var(--ink)">$487.320</p>
-        <div class="mt-2 flex items-center gap-2 flex-wrap">
-          <span class="text-xs" style="color:#888">Obj: $500.000</span>
-          <span class="text-xs font-medium px-2 py-0.5 badge-red">-2,5%</span>
+        <div class="flex items-center justify-between py-3" style="border-bottom: 1.5px dashed var(--muted)">
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium" style="color:var(--ink)">💸 Inversión</span>
+            <span class="metric-value font-bold" style="color:var(--ink); font-size:1.15rem">$1.840.000</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-xs" style="color:#bbb">Obj: $2.000.000</span>
+            <span class="text-xs font-medium px-1.5 py-0.5 badge-red">-8,0%</span>
+          </div>
         </div>
-        <p class="text-xs mt-1" style="color:#aaa">en el período</p>
+
+        <div class="flex items-center justify-between py-3" style="border-bottom: 1.5px dashed var(--muted)">
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium" style="color:var(--ink)">🏆 Facturación</span>
+            <span class="metric-value font-bold" style="color:var(--ink); font-size:1.15rem">$9.568.000</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-xs" style="color:#bbb">Obj: $8.000.000</span>
+            <span class="text-xs font-medium px-1.5 py-0.5 badge-green">+19,6%</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between py-3" style="border-bottom: 1.5px dashed var(--muted)">
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium" style="color:var(--ink)">🎯 ROAS</span>
+            <span class="metric-value font-bold roas-green" style="font-size:1.15rem">5.20x</span>
+          </div>
+          <div class="flex items-center gap-1">
+            <span class="text-xs" style="color:#bbb">Obj: 4.00x</span>
+            <span class="text-xs font-medium px-1.5 py-0.5 badge-green">+30,0%</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between py-3" style="border-bottom: 1.5px dashed var(--muted)">
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium" style="color:var(--ink)">📉 Inv / Fc</span>
+            <span class="metric-value font-bold" style="color:var(--ink); font-size:1.15rem">19,2%</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between py-3" style="border-bottom: 1.5px dashed var(--muted)">
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium" style="color:var(--ink)">🛍️ Ventas</span>
+            <span class="metric-value font-bold" style="color:var(--ink); font-size:1.15rem">212</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between py-3" style="border-bottom: 1.5px dashed var(--muted)">
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium" style="color:var(--ink)">🎫 Ticket promedio</span>
+            <span class="metric-value font-bold" style="color:var(--ink); font-size:1.15rem">$45.132</span>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-between py-3">
+          <div class="flex items-center gap-3">
+            <span class="text-sm font-medium" style="color:var(--ink)">🎯 CPA</span>
+            <span class="metric-value font-bold" style="color:var(--ink); font-size:1.15rem">$8.679</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Secondary KPIs -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+
+      <div class="card-sm p-5" style="transform:rotate(-0.8deg)">
+        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">📡 CPM</p>
+        <p class="metric-value text-2xl font-bold" style="color:var(--ink)">$3.140</p>
+        <div class="mt-2 flex items-center gap-1 flex-wrap">
+          <span class="text-xs" style="color:#aaa">Prom. agencia: $4.280</span>
+          <span class="text-xs font-medium px-1.5 py-0.5 badge-green">-26,6%</span>
+        </div>
       </div>
 
-      <div class="card p-6" style="transform:rotate(0.5deg)">
-        <p class="text-xs uppercase tracking-wider font-bold mb-1" style="color:#888">🏆 Valor de Conversión</p>
-        <p class="metric-value text-3xl font-bold mt-1" style="color:var(--ink)">$2.091.480</p>
-        <div class="mt-2 flex items-center gap-2 flex-wrap">
-          <span class="text-xs" style="color:#888">Obj: $2.000.000</span>
-          <span class="text-xs font-medium px-2 py-0.5 badge-green">+4,6%</span>
+      <div class="card-sm p-5" style="transform:rotate(0.6deg)">
+        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">🪝 Tasa de gancho</p>
+        <p class="metric-value text-2xl font-bold" style="color:var(--ink)">44,7%</p>
+        <div class="mt-2 flex items-center gap-1 flex-wrap">
+          <span class="text-xs" style="color:#aaa">Prom. agencia: 31,2%</span>
+          <span class="text-xs font-medium px-1.5 py-0.5 badge-green">+43,3%</span>
         </div>
-        <p class="text-xs mt-1" style="color:#aaa">en ventas generadas</p>
       </div>
 
-      <div class="card p-6" style="transform:rotate(-0.3deg)">
-        <p class="text-xs uppercase tracking-wider font-bold mb-1" style="color:#888">🎯 ROAS</p>
-        <p class="metric-value text-3xl font-bold mt-1 roas-green">4.29x</p>
-        <div class="mt-2 flex items-center gap-2 flex-wrap">
-          <span class="text-xs" style="color:#888">Obj: 4.00x</span>
-          <span class="text-xs font-medium px-2 py-0.5 badge-green">+7,3%</span>
+      <div class="card-sm p-5" style="transform:rotate(-0.4deg)">
+        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">🖱️ CTR</p>
+        <p class="metric-value text-2xl font-bold" style="color:var(--ink)">2,84%</p>
+        <div class="mt-2 flex items-center gap-1 flex-wrap">
+          <span class="text-xs" style="color:#aaa">Prom. agencia: 1,91%</span>
+          <span class="text-xs font-medium px-1.5 py-0.5 badge-green">+48,7%</span>
         </div>
-        <p class="text-xs mt-1" style="color:#aaa">retorno sobre inversión</p>
       </div>
 
+      <div class="card-sm p-5" style="transform:rotate(0.9deg)">
+        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">🛒 Conv. web</p>
+        <p class="metric-value text-2xl font-bold" style="color:var(--ink)">5,30%</p>
+        <div class="mt-2 flex items-center gap-1 flex-wrap">
+          <span class="text-xs" style="color:#aaa">Prom. agencia: 3,40%</span>
+          <span class="text-xs font-medium px-1.5 py-0.5 badge-green">+55,9%</span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Ads section -->
+    <div class="card p-6 mb-6" style="transform:rotate(-0.3deg)">
+      <h2 class="heading text-xl mb-5" style="color:var(--ink)">🏅 Anuncios con mayor inversión</h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-xs uppercase tracking-wider" style="color:#aaa; border-bottom: 2px dashed var(--muted)">
+              <th class="text-left pb-3 font-normal">Anuncio</th>
+              <th class="text-right pb-3 font-normal">Gastado</th>
+              <th class="text-right pb-3 font-normal pl-6">Facturación</th>
+              <th class="text-right pb-3 font-normal pl-6">ROAS</th>
+              <th class="text-right pb-3 font-normal pl-6">Ventas</th>
+              <th class="pb-3 pl-4"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">Video — Lanzamiento temporada</td>
+              <td class="py-3 text-right tabular-nums" style="color:#555">$512.000</td>
+              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$2.969.600</td>
+              <td class="py-3 text-right tabular-nums pl-6 font-bold roas-green">5.80x</td>
+              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">64</td>
+              <td class="py-3 pl-4 text-right"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></td>
+            </tr>
+            <tr style="border-top: 2px dashed #e8e3da">
+              <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">Carrusel — Testimonios de clientes</td>
+              <td class="py-3 text-right tabular-nums" style="color:#555">$387.000</td>
+              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$2.012.400</td>
+              <td class="py-3 text-right tabular-nums pl-6 font-bold roas-green">5.20x</td>
+              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">47</td>
+              <td class="py-3 pl-4 text-right"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></td>
+            </tr>
+            <tr style="border-top: 2px dashed #e8e3da">
+              <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">Video — Detrás de escena</td>
+              <td class="py-3 text-right tabular-nums" style="color:#555">$298.000</td>
+              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$1.430.400</td>
+              <td class="py-3 text-right tabular-nums pl-6 font-bold roas-green">4.80x</td>
+              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">33</td>
+              <td class="py-3 pl-4 text-right"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></td>
+            </tr>
+            <tr style="border-top: 2px dashed #e8e3da">
+              <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">Imagen — Producto estrella</td>
+              <td class="py-3 text-right tabular-nums" style="color:#555">$241.000</td>
+              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$1.374.300</td>
+              <td class="py-3 text-right tabular-nums pl-6 font-bold roas-green">5.70x</td>
+              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">31</td>
+              <td class="py-3 pl-4 text-right"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></td>
+            </tr>
+            <tr style="border-top: 2px dashed #e8e3da">
+              <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">Carrusel — Nueva colección</td>
+              <td class="py-3 text-right tabular-nums" style="color:#555">$198.000</td>
+              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$831.600</td>
+              <td class="py-3 text-right tabular-nums pl-6 font-bold roas-yellow">4.20x</td>
+              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">19</td>
+              <td class="py-3 pl-4 text-right"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></td>
+            </tr>
+            <tr style="border-top: 2px dashed #e8e3da">
+              <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">Video — Oferta especial</td>
+              <td class="py-3 text-right tabular-nums" style="color:#555">$164.000</td>
+              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$950.200</td>
+              <td class="py-3 text-right tabular-nums pl-6 font-bold roas-green">5.80x</td>
+              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">18</td>
+              <td class="py-3 pl-4 text-right"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
 
     <!-- Chart -->
@@ -164,129 +308,64 @@
       </div>
     </div>
 
-    <!-- Secondary KPIs -->
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-
-      <div class="card-sm p-5" style="transform:rotate(-0.8deg)">
-        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">📡 CPM</p>
-        <p class="metric-value text-2xl font-bold" style="color:var(--ink)">$2.840</p>
-        <div class="mt-2 flex items-center gap-1 flex-wrap">
-          <span class="text-xs" style="color:#aaa">Prom. agencia: $3.520</span>
-          <span class="text-xs font-medium px-1.5 py-0.5 badge-green">-19,3%</span>
-        </div>
-      </div>
-
-      <div class="card-sm p-5" style="transform:rotate(0.6deg)">
-        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">🪝 Tasa de gancho</p>
-        <p class="metric-value text-2xl font-bold" style="color:var(--ink)">41,2%</p>
-        <div class="mt-2 flex items-center gap-1 flex-wrap">
-          <span class="text-xs" style="color:#aaa">Prom. agencia: 33,7%</span>
-          <span class="text-xs font-medium px-1.5 py-0.5 badge-green">+22,3%</span>
-        </div>
-      </div>
-
-      <div class="card-sm p-5" style="transform:rotate(-0.4deg)">
-        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">🖱️ CTR</p>
-        <p class="metric-value text-2xl font-bold" style="color:var(--ink)">2,38%</p>
-        <div class="mt-2 flex items-center gap-1 flex-wrap">
-          <span class="text-xs" style="color:#aaa">Prom. agencia: 1,94%</span>
-          <span class="text-xs font-medium px-1.5 py-0.5 badge-green">+22,7%</span>
-        </div>
-      </div>
-
-      <div class="card-sm p-5" style="transform:rotate(0.9deg)">
-        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">🛒 Conv. web</p>
-        <p class="metric-value text-2xl font-bold" style="color:var(--ink)">4,11%</p>
-        <div class="mt-2 flex items-center gap-1 flex-wrap">
-          <span class="text-xs" style="color:#aaa">Prom. agencia: 3,08%</span>
-          <span class="text-xs font-medium px-1.5 py-0.5 badge-green">+33,4%</span>
-        </div>
-      </div>
-
+    <!-- Resultados por objetivo -->
+    <div class="card p-6 mb-6" style="transform:rotate(0.3deg)">
+      <h2 class="heading text-xl mb-5" style="color:var(--ink)">🏹 Resultados por objetivo de campaña</h2>
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="text-xs uppercase tracking-wider" style="color:#aaa; border-bottom: 2px dashed var(--muted)">
+            <th class="text-left pb-3 font-normal">Objetivo</th>
+            <th class="text-right pb-3 font-normal">Gastado</th>
+            <th class="text-right pb-3 font-normal pl-6">Facturación</th>
+            <th class="text-right pb-3 font-normal pl-6">ROAS</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="py-3 font-semibold" style="color:var(--ink)">🛒 Campañas de ventas</td>
+            <td class="py-3 text-right tabular-nums" style="color:#555">$1.612.000</td>
+            <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$8.868.560</td>
+            <td class="py-3 text-right pl-6">
+              <span class="tabular-nums font-bold roas-green">5.50x</span>
+              <span class="text-xs font-medium px-1.5 py-0.5 badge-green ml-2">Obj: 4.00x</span>
+            </td>
+          </tr>
+          <tr style="border-top: 2px dashed var(--muted)">
+            <td class="py-3 font-semibold" style="color:var(--ink)">📣 Otros objetivos</td>
+            <td class="py-3 text-right tabular-nums" style="color:#555">$228.000</td>
+            <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$699.440</td>
+            <td class="py-3 text-right pl-6">
+              <span class="tabular-nums font-bold roas-yellow">3.07x</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- Ads section -->
-    <div class="card p-6" style="transform:rotate(-0.3deg)">
-      <h2 class="heading text-xl mb-5" style="color:var(--ink)">🏅 Anuncios con mayor inversión</h2>
-      <div class="overflow-x-auto">
-        <table class="w-full text-sm">
-          <thead>
-            <tr class="text-xs uppercase tracking-wider" style="color:#aaa; border-bottom: 2px dashed var(--muted)">
-              <th class="text-left pb-3 font-normal">Anuncio</th>
-              <th class="text-right pb-3 font-normal">Gastado</th>
-              <th class="text-right pb-3 font-normal pl-6">Facturación</th>
-              <th class="text-right pb-3 font-normal pl-6">ROAS</th>
-              <th class="text-right pb-3 font-normal pl-6">Compras</th>
-              <th class="pb-3 pl-4"></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">Video — Nueva colección verano</td>
-              <td class="py-3 text-right tabular-nums" style="color:#555">$124.800</td>
-              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$681.240</td>
-              <td class="py-3 text-right tabular-nums pl-6 font-bold roas-green">5.46x</td>
-              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">38</td>
-              <td class="py-3 pl-4 text-right"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></td>
-            </tr>
-            <tr style="border-top: 2px dashed #e8e3da">
-              <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">Carrusel — Productos más vendidos</td>
-              <td class="py-3 text-right tabular-nums" style="color:#555">$98.450</td>
-              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$413.490</td>
-              <td class="py-3 text-right tabular-nums pl-6 font-bold roas-green">4.20x</td>
-              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">27</td>
-              <td class="py-3 pl-4 text-right"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></td>
-            </tr>
-            <tr style="border-top: 2px dashed #e8e3da">
-              <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">Imagen — Oferta de temporada</td>
-              <td class="py-3 text-right tabular-nums" style="color:#555">$76.920</td>
-              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$291.090</td>
-              <td class="py-3 text-right tabular-nums pl-6 font-bold roas-green">3.78x</td>
-              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">19</td>
-              <td class="py-3 pl-4 text-right"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></td>
-            </tr>
-            <tr style="border-top: 2px dashed #e8e3da">
-              <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">Video — Testimonial clienta</td>
-              <td class="py-3 text-right tabular-nums" style="color:#555">$68.340</td>
-              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$333.260</td>
-              <td class="py-3 text-right tabular-nums pl-6 font-bold roas-green">4.88x</td>
-              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">22</td>
-              <td class="py-3 pl-4 text-right"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></td>
-            </tr>
-            <tr style="border-top: 2px dashed #e8e3da">
-              <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">Carrusel — Lookbook otoño</td>
-              <td class="py-3 text-right tabular-nums" style="color:#555">$54.180</td>
-              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$181.500</td>
-              <td class="py-3 text-right tabular-nums pl-6 font-bold roas-yellow">3.35x</td>
-              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">12</td>
-              <td class="py-3 pl-4 text-right"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></td>
-            </tr>
-            <tr style="border-top: 2px dashed #e8e3da">
-              <td class="py-3 pr-4 max-w-xs truncate font-medium" style="color:var(--ink)">Imagen — Lanzamiento producto nuevo</td>
-              <td class="py-3 text-right tabular-nums" style="color:#555">$38.630</td>
-              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">$190.900</td>
-              <td class="py-3 text-right tabular-nums pl-6 font-bold roas-green">4.94x</td>
-              <td class="py-3 text-right tabular-nums pl-6" style="color:#555">14</td>
-              <td class="py-3 pl-4 text-right"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#bbb" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-
-    <p class="text-center text-xs mt-8" style="color:#bbb">✏️ Los datos se actualizan diariamente con información del día anterior · FDC Digital</p>
+    <p class="text-center text-xs mt-8 mb-4" style="color:#bbb">✏️ Los datos se actualizan diariamente con información del día anterior · FDC Digital</p>
 
   </div>
 
   <script>
-    // Datos de ejemplo para el gráfico — 13 días de abril 2026
+    // Datos de ejemplo para el gráfico — 26 días de abril 2026
     const labels = [
-      '2026-04-01','2026-04-02','2026-04-03','2026-04-04','2026-04-05',
-      '2026-04-06','2026-04-07','2026-04-08','2026-04-09','2026-04-10',
-      '2026-04-11','2026-04-12','2026-04-13'
+      '2026-04-01','2026-04-02','2026-04-03','2026-04-04','2026-04-05','2026-04-06','2026-04-07',
+      '2026-04-08','2026-04-09','2026-04-10','2026-04-11','2026-04-12','2026-04-13','2026-04-14',
+      '2026-04-15','2026-04-16','2026-04-17','2026-04-18','2026-04-19','2026-04-20','2026-04-21',
+      '2026-04-22','2026-04-23','2026-04-24','2026-04-25','2026-04-26'
     ];
-    const spentData = [32400, 38700, 35100, 41200, 29800, 22100, 25600, 44300, 51200, 48900, 36700, 42800, 38520];
-    const convData  = [148300, 172400, 143800, 198600, 127400, 88200, 110800, 202700, 248400, 221300, 152600, 199800, 177180];
+    const spentData = [
+      48200, 52400, 61800, 57300, 44100, 38700, 42500,
+      63400, 71200, 68900, 74300, 59800, 55200, 61700,
+      78400, 82100, 76500, 88200, 91400, 84700, 67300,
+      94100, 98700, 87400, 91800, 85600
+    ];
+    const convData = [
+      241000, 267200, 328600, 298500, 214900, 183800, 207200,
+      334700, 384500, 361300, 401200, 311800, 283400, 324900,
+      423600, 451300, 413200, 488400, 511800, 466900, 356700,
+      531800, 568400, 489200, 524900, 476300
+    ];
 
     new Chart(document.getElementById('main-chart'), {
       type: 'line',
