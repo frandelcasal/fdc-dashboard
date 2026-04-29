@@ -1,8 +1,4 @@
 // ─── Configuración ────────────────────────────────────────────────────────────
-const SHEET_CRUDO    = 'crudo';
-const SHEET_OBJETIVOS = 'objetivos';
-const SHEET_CLIENTES = 'cuentas';
-
 const ALERT_EMAILS_FULL = ['fran@frandelcasal.com', 'gaspar@frandelcasal.com'];
 const DAYS_THRESHOLD    = 3;
 const DASHBOARD_URL     = 'https://fdc-dashboard.vercel.app/admin.html';
@@ -45,16 +41,16 @@ function toDateOnly(val) {
 function checkNoSalesAlerts() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  const dataRows    = sheetToObjects(ss.getSheetByName(SHEET_CRUDO));
-  const targetsRows = sheetToObjects(ss.getSheetByName(SHEET_OBJETIVOS));
-  const clientsRows = sheetToObjects(ss.getSheetByName(SHEET_CLIENTES));
+  const dataRows    = sheetToObjects(ss.getSheetByName('crudo'));
+  const targetsRows = sheetToObjects(ss.getSheetByName('objetivos'));
+  const clientsRows = sheetToObjects(ss.getSheetByName('cuentas'));
 
   Logger.log(`Filas crudas: ${dataRows.length} | Objetivos: ${targetsRows.length} | Clientes: ${clientsRows.length}`);
 
   // 1. Cuentas excluidas de la alerta de ventas
   const noSalesAccounts = new Set();
   clientsRows.forEach(r => {
-    const id = String(r['cuenta publicitaria'] || '').trim();
+    const id = String(r['account_id'] || '').trim();
     if (id && String(r['sin ventas'] || '').trim().toLowerCase() === 'si') {
       noSalesAccounts.add(id);
     }
@@ -63,8 +59,8 @@ function checkNoSalesAlerts() {
   // 2. Mapa accountId → nombre legible
   const clientsMap = {};
   clientsRows.forEach(r => {
-    const id   = String(r['cuenta publicitaria'] || '').trim();
-    const name = String(r['cliente'] || '').trim();
+    const id   = String(r['account_id'] || '').trim();
+    const name = String(r['nombre'] || '').trim();
     if (id) clientsMap[id] = name || id;
   });
 

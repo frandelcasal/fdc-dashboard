@@ -1,7 +1,4 @@
 // ─── Configuración ────────────────────────────────────────────────────────────
-const SHEET_CRUDO_R     = 'crudo';
-const SHEET_OBJETIVOS_R = 'objetivos';
-const SHEET_CLIENTES_R  = 'cuentas';
 
 const FROM_NAME_R    = 'FDC Digital';
 const REPLY_TO_R     = 'fran@frandelcasal.com';
@@ -45,9 +42,9 @@ function fmtDiff(real, obj) {
 function enviarResumenSemanal() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  const dataRows    = sheetToObjectsR(ss.getSheetByName(SHEET_CRUDO_R));
-  const targetsRows = sheetToObjectsR(ss.getSheetByName(SHEET_OBJETIVOS_R));
-  const clientsRows = sheetToObjectsR(ss.getSheetByName(SHEET_CLIENTES_R));
+  const dataRows    = sheetToObjectsR(ss.getSheetByName('crudo'));
+  const targetsRows = sheetToObjectsR(ss.getSheetByName('objetivos'));
+  const clientsRows = sheetToObjectsR(ss.getSheetByName('cuentas'));
 
   // Mes actual
   const now        = new Date();
@@ -69,9 +66,9 @@ function enviarResumenSemanal() {
   let sent = 0;
 
   clientsRows.forEach(client => {
-    const accountId = String(client['cuenta publicitaria'] || '').trim();
+    const accountId = String(client['account_id'] || '').trim();
     const email     = String(client['email'] || '').trim();
-    const nombre    = String(client['cliente'] || '').trim();
+    const nombre    = String(client['nombre'] || '').trim();
 
     if (!accountId || !email) return;
 

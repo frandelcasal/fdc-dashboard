@@ -1,7 +1,4 @@
 // ─── Configuración ────────────────────────────────────────────────────────────
-const SHEET_CRUDO_E     = 'crudo';
-const SHEET_OBJETIVOS_E = 'objetivos';
-const SHEET_CLIENTES_E  = 'cuentas';
 
 const EXPORT_EMAIL   = 'fran@frandelcasal.com';
 const EXPORT_DAYS    = 30; // días hacia atrás a incluir
@@ -50,15 +47,15 @@ function buildCSV(headers, rows) {
 function exportarCSVsPorEspecialista() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
 
-  const { headers: crudoHeaders, rows: crudoRows } = sheetToObjectsE(ss.getSheetByName(SHEET_CRUDO_E));
-  const { rows: objetivosRows } = sheetToObjectsE(ss.getSheetByName(SHEET_OBJETIVOS_E));
-  const { rows: clientesRows }  = sheetToObjectsE(ss.getSheetByName(SHEET_CLIENTES_E));
+  const { headers: crudoHeaders, rows: crudoRows } = sheetToObjectsE(ss.getSheetByName('crudo'));
+  const { rows: objetivosRows } = sheetToObjectsE(ss.getSheetByName('objetivos'));
+  const { rows: clientesRows }  = sheetToObjectsE(ss.getSheetByName('cuentas'));
 
   // Mapa accountId → nombre cliente
   const clientesMap = {};
   clientesRows.forEach(r => {
-    const id   = String(r['cuenta publicitaria'] || '').trim();
-    const name = String(r['cliente'] || id).trim();
+    const id   = String(r['account_id'] || '').trim();
+    const name = String(r['nombre'] || id).trim();
     if (id) clientesMap[id] = name;
   });
 
