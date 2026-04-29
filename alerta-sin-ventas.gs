@@ -1,11 +1,18 @@
 // ─── Configuración ────────────────────────────────────────────────────────────
 const SHEET_CRUDO    = 'crudo';
-const SHEET_OBJETIVOS = 'objetivos-dashboard';
-const SHEET_CLIENTES = 'aux';
+const SHEET_OBJETIVOS = 'objetivos';
+const SHEET_CLIENTES = 'cuentas';
 
-const ALERT_EMAIL    = 'fran@frandelcasal.com';
-const DAYS_THRESHOLD = 3;
-const DASHBOARD_URL  = 'https://fdc-dashboard.vercel.app/admin.html';
+const ALERT_EMAILS_FULL = ['fran@frandelcasal.com', 'gaspar@frandelcasal.com'];
+const DAYS_THRESHOLD    = 3;
+const DASHBOARD_URL     = 'https://fdc-dashboard.vercel.app/admin.html';
+
+const ALERT_ESPECIALISTAS_EMAILS = {
+  'marti': 'mfortesvallejos@gmail.com',
+  'aye':   'Ayelenlopezcm@gmail.com',
+  'belu':  'belupiscitelli@gmail.com',
+  'sofi':  'sofiacordobazalazar@gmail.com',
+};
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function sheetToObjects(sheet) {
@@ -61,13 +68,18 @@ function checkNoSalesAlerts() {
     if (id) clientsMap[id] = name || id;
   });
 
-  // 3. Cuentas activas (meta ads activa ≠ 'no')
+  // 3. Cuentas activas (meta ads activa ≠ 'no') + mapa accountId → especialista
   const activeAccounts = new Set();
+  const accountEspMap  = {};
   targetsRows.forEach(r => {
     const metaActive = String(r['meta ads activa'] || '').trim().toLowerCase();
     if (metaActive === 'no') return;
     const accountId = String(r['cuenta publicitaria'] || '').trim();
-    if (accountId) activeAccounts.add(accountId);
+    const esp       = String(r['especialista'] || '').trim().toLowerCase();
+    if (accountId) {
+      activeAccounts.add(accountId);
+      if (esp) accountEspMap[accountId] = esp;
+    }
   });
 
   Logger.log(`Cuentas activas: ${activeAccounts.size} | Excluidas de ventas: ${noSalesAccounts.size}`);
@@ -128,7 +140,8 @@ function checkNoSalesAlerts() {
     }
 
     const name = clientsMap[accountId] || accountId;
-    alerts.push({ name, accountId, days: daysSinceLastSale });
+    const esp  = accountEspMap[accountId] || null;
+    alerts.push({ name, accountId, days: daysSinceLastSale, esp });
   });
 
   if (!alerts.length) {
@@ -139,11 +152,28 @@ function checkNoSalesAlerts() {
   alerts.sort((a, b) => b.days - a.days);
   Logger.log(`🚨 ${alerts.length} cuenta(s) sin ventas: ${alerts.map(a => `${a.name} (${a.days}d)`).join(', ')}`);
 
-  sendAlertEmail(alerts);
+  // Enviar reporte completo a Fran y Gaspar
+  sendAlertEmail(alerts, ALERT_EMAILS_FULL);
+
+  // Enviar alerta filtrada a cada especialista
+  const alertsByEsp = {};
+  alerts.forEach(a => {
+    if (!a.esp) return;
+    if (!alertsByEsp[a.esp]) alertsByEsp[a.esp] = [];
+    alertsByEsp[a.esp].push(a);
+  });
+
+  Object.entries(alertsByEsp).forEach(([esp, espAlerts]) => {
+    const espEmail = ALERT_ESPECIALISTAS_EMAILS[esp];
+    if (!espEmail) return;
+    sendAlertEmail(espAlerts, [espEmail]);
+    Logger.log(`Mail enviado a ${esp} (${espEmail}) con ${espAlerts.length} alerta(s)`);
+  });
 }
 
 // ─── Email ────────────────────────────────────────────────────────────────────
-function sendAlertEmail(alerts) {
+function sendAlertEmail(alerts, recipients) {
+  if (!alerts || !alerts.length || !recipients || !recipients.length) return;
   const count   = alerts.length;
   const subject = `[ALERTA] ${count} cuenta${count !== 1 ? 's' : ''} sin ventas · FDC Digital`;
 
@@ -178,6 +208,8 @@ function sendAlertEmail(alerts) {
       </p>
     </div>`;
 
-  GmailApp.sendEmail(ALERT_EMAIL, subject, '', { htmlBody, name: 'FDC Digital', replyTo: 'fran@frandelcasal.com' });
-  Logger.log(`📧 Mail enviado a ${ALERT_EMAIL}`);
+  recipients.forEach(email => {
+    GmailApp.sendEmail(email, subject, '', { htmlBody, name: 'FDC Digital', replyTo: 'fran@frandelcasal.com' });
+    Logger.log(`📧 Mail enviado a ${email}`);
+  });
 }

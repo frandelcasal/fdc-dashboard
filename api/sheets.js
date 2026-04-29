@@ -1,7 +1,7 @@
 const { google } = require('googleapis');
 
-const SHEET_ID = '1G7xKRi_xtTjzF86HUbz1vYwMy1kONA_ExNz1hQOXIWo';
-const RANGES   = ['crudo', 'objetivos-dashboard', 'aux'];
+const SHEET_ID = '1ggHEKtGJF5KPbmj4klyqsBaoWMUqdBCWjbsyJJDaJjs';
+const RANGES   = ['crudo', 'objetivos', 'cuentas'];
 
 function toCsv(rows) {
   return (rows || []).map(row =>

@@ -1,7 +1,7 @@
 // ─── Configuración ────────────────────────────────────────────────────────────
 const SHEET_CRUDO_E     = 'crudo';
-const SHEET_OBJETIVOS_E = 'objetivos-dashboard';
-const SHEET_CLIENTES_E  = 'aux';
+const SHEET_OBJETIVOS_E = 'objetivos';
+const SHEET_CLIENTES_E  = 'cuentas';
 
 const EXPORT_EMAIL   = 'fran@frandelcasal.com';
 const EXPORT_DAYS    = 30; // días hacia atrás a incluir

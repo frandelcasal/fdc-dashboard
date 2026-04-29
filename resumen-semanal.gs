@@ -1,7 +1,7 @@
 // ─── Configuración ────────────────────────────────────────────────────────────
 const SHEET_CRUDO_R     = 'crudo';
-const SHEET_OBJETIVOS_R = 'objetivos-dashboard';
-const SHEET_CLIENTES_R  = 'aux';
+const SHEET_OBJETIVOS_R = 'objetivos';
+const SHEET_CLIENTES_R  = 'cuentas';
 
 const FROM_NAME_R    = 'FDC Digital';
 const REPLY_TO_R     = 'fran@frandelcasal.com';

@@ -1,7 +1,7 @@
 // ─── Config ───────────────────────────────────────────────────────────────────
-const GID         = '55753471';
-const TARGETS_GID = '360010815';
-const CLIENTS_GID = '446878211';
+const GID         = '350698360';
+const TARGETS_GID = '332486905';
+const CLIENTS_GID = '0';
 const BATCH_URL   = '/api/sheets';
 
 // ─── Fetch batch (trae las 3 pestañas en una sola llamada) ────────────────────
