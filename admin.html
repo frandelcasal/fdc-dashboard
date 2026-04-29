@@ -1084,8 +1084,8 @@
 
         if (textClients) {
           parseCSV(textClients).forEach(r => {
-            const id   = (r['cuenta publicitaria'] || '').trim();
-            const name = (r['cliente'] || id).trim();
+            const id   = (r['account_id'] || '').trim();
+            const name = (r['nombre'] || id).trim();
             if (id) {
               clientsMap[id] = name.split(' ')
                 .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');

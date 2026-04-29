@@ -931,9 +931,9 @@
         // Client name
         if (textClients) {
           const clientRows = parseCSV(textClients);
-          const match = clientRows.find(r => r['cuenta publicitaria'] && r['cuenta publicitaria'].trim() === accountId);
+          const match = clientRows.find(r => r['account_id'] && r['account_id'].trim() === accountId);
           if (match) {
-            const name = match['cliente'] || '';
+            const name = match['nombre'] || '';
             const formatted = name.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
             document.getElementById('dashboard-title').textContent = `Reporte de Campañas — ${formatted} 📊`;
           }
