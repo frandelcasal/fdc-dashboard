@@ -575,6 +575,36 @@
       return result;
     }
 
+    function filterAdsByPeriod(rows, period) {
+      if (period === 'all') return rows;
+      const now = new Date();
+      if (period === 'this_month') {
+        const prefix = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        return rows.filter(r => r['Month'] && String(r['Month']).slice(0, 7) === prefix);
+      }
+      if (period === 'last_month') {
+        const d = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const prefix = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+        return rows.filter(r => r['Month'] && String(r['Month']).slice(0, 7) === prefix);
+      }
+      if (period === 'custom') {
+        const from = document.getElementById('date-from')?.value;
+        const to   = document.getElementById('date-to')?.value;
+        if (!from && !to) return rows;
+        return rows.filter(r => {
+          const m = r['Month'] ? String(r['Month']).slice(0, 7) : null;
+          if (!m) return false;
+          if (from && m < from.slice(0, 7)) return false;
+          if (to   && m > to.slice(0, 7))   return false;
+          return true;
+        });
+      }
+      const cutoff = new Date(now);
+      cutoff.setDate(cutoff.getDate() - (period - 1));
+      const cutoffPrefix = `${cutoff.getFullYear()}-${String(cutoff.getMonth() + 1).padStart(2, '0')}`;
+      return rows.filter(r => r['Month'] && String(r['Month']).slice(0, 7) >= cutoffPrefix);
+    }
+
     function filterByPeriod(rows, period) {
       if (period === 'all') return rows;
       if (period === 'custom') {
