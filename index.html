@@ -658,10 +658,12 @@
     function aggregateByAd(rows, rate = 1) {
       const byAd = {};
       rows.forEach(r => {
-        const name  = r['Ad Name'] || 'Sin nombre';
-        const adId  = (r['Ad ID'] || '').trim();
-        const link  = adId ? `https://adsmanager.facebook.com/adsmanager/manage/ads?ad_id=${adId}` : '';
+        const name   = r['Ad Name'] || 'Sin nombre';
+        const adId   = (r['Ad ID'] || '').trim();
+        const igLink = (r['Instagram Permalink'] || '').trim();
+        const link   = igLink || (adId ? `https://adsmanager.facebook.com/adsmanager/manage/ads?ad_id=${adId}` : '');
         if (!byAd[name]) byAd[name] = { name, link, spent: 0, conv: 0, purchases: 0 };
+        else if (igLink && !byAd[name].link.includes('instagram.com')) byAd[name].link = igLink;
         byAd[name].spent     += parseNumber(r['Amount Spent']);
         byAd[name].conv      += parseNumber(r['Website Purchases Conversion Value']);
         byAd[name].purchases += parseNumber(r['Website Purchases']);

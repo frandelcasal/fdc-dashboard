@@ -160,7 +160,7 @@ function fetchAnunciosMes() {
   const HEADERS = ['Account ID','Ad ID','Ad Name','Month','Amount Spent',
     'Website Purchases Conversion Value','Impressions',
     'Inline Link Clicks','Website Purchases',
-    '3 Seconds Video View','Landing Page Views'];
+    '3 Seconds Video View','Landing Page Views','Instagram Permalink'];
 
   const today = new Date();
   const since = new Date(today); since.setDate(since.getDate() - ANUNCIOS_DAYS);
@@ -170,8 +170,11 @@ function fetchAnunciosMes() {
   const allRows = [];
   for (const id of accountIds) {
     try {
-      const rows = fetchInsights(id, sinceStr, untilStr, token, 'monthly', true);
-      allRows.push(...rows);
+      const rows      = fetchInsights(id, sinceStr, untilStr, token, 'monthly', true);
+      const permalinks = fetchAdCreatives(id, token);
+      // row[1] = Ad ID → inject permalink as last column
+      const rowsWithLinks = rows.map(row => [...row, permalinks[row[1]] || '']);
+      allRows.push(...rowsWithLinks);
       Utilities.sleep(1000);
     } catch(e) {
       Logger.log(`⚠️ anuncios/${id}: ${e.message}`);
@@ -264,4 +267,28 @@ function getVal(arr, type) {
   if (!arr) return 0;
   const f = arr.find(a => a.action_type === type);
   return f ? parseFloat(f.value) : 0;
+}
+
+// ─── Trae instagram_permalink_url por ad_id ───────────────────────────────────
+function fetchAdCreatives(accountId, token) {
+  try {
+    const url = `https://graph.facebook.com/${META_VERSION}/act_${accountId}/ads`
+      + `?fields=id,creative{instagram_permalink_url}&limit=500&access_token=${token}`;
+    const res  = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    const json = JSON.parse(res.getContentText());
+    if (json.error) {
+      Logger.log(`⚠️ creatives/${accountId}: ${json.error.message}`);
+      return {};
+    }
+    const map = {};
+    (json.data || []).forEach(ad => {
+      const permalink = ad.creative && ad.creative.instagram_permalink_url;
+      if (permalink) map[String(ad.id)] = permalink;
+    });
+    Logger.log(`  ↳ creatives/${accountId}: ${Object.keys(map).length} permalinks`);
+    return map;
+  } catch(e) {
+    Logger.log(`⚠️ creatives/${accountId}: ${e.message}`);
+    return {};
+  }
 }
