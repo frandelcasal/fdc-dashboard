@@ -279,28 +279,57 @@ function getVal(arr, type) {
   return f ? parseFloat(f.value) : 0;
 }
 
-// ─── Trae instagram_permalink_url por ad_id (con paginación) ─────────────────
+// ─── Trae instagram_permalink_url por ad_id (2 pasos + batch) ────────────────
 function fetchAdCreatives(accountId, token) {
   try {
-    const fields    = encodeURIComponent('id,creative{instagram_permalink_url}');
+    // Paso 1: traer solo id,creative (liviano — sin expansión anidada)
     const filtering = encodeURIComponent(JSON.stringify([{"field":"ad.effective_status","operator":"IN","value":["ACTIVE","PAUSED"]}]));
     let url = `https://graph.facebook.com/${META_VERSION}/act_${accountId}/ads`
-      + `?fields=${fields}&filtering=${filtering}&limit=500&access_token=${token}`;
+      + `?fields=id,creative&filtering=${filtering}&limit=500&access_token=${token}`;
 
-    const map = {};
+    const adCreativeMap = {}; // adId → creativeId
     while (url) {
       const res  = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
       const json = JSON.parse(res.getContentText());
-      if (json.error) {
-        Logger.log(`⚠️ creatives/${accountId}: ${json.error.message}`);
-        break;
-      }
+      if (json.error) { Logger.log(`⚠️ creatives/${accountId}: ${json.error.message}`); break; }
       (json.data || []).forEach(ad => {
-        const permalink = ad.creative && ad.creative.instagram_permalink_url;
-        if (permalink) map[String(ad.id)] = permalink;
+        if (ad.creative && ad.creative.id) adCreativeMap[String(ad.id)] = String(ad.creative.id);
       });
       url = json.paging && json.paging.next ? json.paging.next : null;
       if (url) Utilities.sleep(500);
+    }
+
+    // Paso 2: batch-fetch instagram_permalink_url en grupos de 50
+    const creativeIds  = [...new Set(Object.values(adCreativeMap))];
+    const permalinkMap = {}; // creativeId → permalink
+    const BATCH_SIZE   = 50;
+
+    for (let i = 0; i < creativeIds.length; i += BATCH_SIZE) {
+      const batch = creativeIds.slice(i, i + BATCH_SIZE).map(id => ({
+        method: 'GET', relative_url: `${id}?fields=instagram_permalink_url`
+      }));
+      const batchRes  = UrlFetchApp.fetch(`https://graph.facebook.com/${META_VERSION}`, {
+        method: 'post',
+        payload: { batch: JSON.stringify(batch), access_token: token },
+        muteHttpExceptions: true
+      });
+      const batchJson = JSON.parse(batchRes.getContentText());
+      if (Array.isArray(batchJson)) {
+        batchJson.forEach((item, idx) => {
+          if (item && item.code === 200) {
+            const data = JSON.parse(item.body);
+            if (data.instagram_permalink_url)
+              permalinkMap[creativeIds[i + idx]] = data.instagram_permalink_url;
+          }
+        });
+      }
+      if (i + BATCH_SIZE < creativeIds.length) Utilities.sleep(500);
+    }
+
+    // Paso 3: mapear adId → permalink
+    const map = {};
+    for (const [adId, creativeId] of Object.entries(adCreativeMap)) {
+      if (permalinkMap[creativeId]) map[adId] = permalinkMap[creativeId];
     }
 
     Logger.log(`  ↳ creatives/${accountId}: ${Object.keys(map).length} permalinks`);
