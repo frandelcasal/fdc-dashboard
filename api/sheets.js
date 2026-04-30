@@ -1,7 +1,7 @@
 const { google } = require('googleapis');
 
 const SHEET_ID = '1ggHEKtGJF5KPbmj4klyqsBaoWMUqdBCWjbsyJJDaJjs';
-const RANGES   = ['crudo', 'objetivos', 'cuentas'];
+const RANGES   = ['crudo', 'objetivos', 'cuentas', 'anuncios-mes'];
 
 function toCsv(rows) {
   return (rows || []).map(row =>
@@ -33,10 +33,10 @@ export default async function handler(req, res) {
       ranges: RANGES,
     });
 
-    const [main, targets, clients] = response.data.valueRanges.map(r => toCsv(r.values));
+    const [main, targets, clients, ads] = response.data.valueRanges.map(r => toCsv(r.values));
 
     res.setHeader('Content-Type', 'application/json');
-    res.status(200).json({ main, targets, clients });
+    res.status(200).json({ main, targets, clients, ads });
 
   } catch (err) {
     console.error('Error en /api/sheets:', err);

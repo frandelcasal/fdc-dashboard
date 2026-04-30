@@ -442,6 +442,7 @@
     let allRows     = [];
     let agencyRows  = [];
     let targetsRows = [];
+    let adRows      = [];
     let currentAccountId = null;
     let currentPeriod = 'this_month';
     let chart = null;
@@ -833,8 +834,9 @@
         }
       });
 
-      // Ads table
-      const ads = aggregateByAd(filtered, exchangeRate);
+      // Ads table — usa anuncios-mes filtrado por período
+      const filteredAds = filterAdsByPeriod(adRows, currentPeriod);
+      const ads = aggregateByAd(filteredAds, exchangeRate);
       // Resultados por objetivo de campaña
       const salesRows  = filtered.filter(r => (r['Campaign Objective'] || '').trim() === 'OUTCOME_SALES');
       const otherRows  = filtered.filter(r => (r['Campaign Objective'] || '').trim() !== 'OUTCOME_SALES');
@@ -908,11 +910,16 @@
     async function loadData(accountId) {
       show('loading-screen');
       try {
-        const { main: textMain, targets: textTargets, clients: textClients } = await fetchAllSheets();
+        const { main: textMain, targets: textTargets, clients: textClients, ads: textAds } = await fetchAllSheets();
 
         const rows = parseCSV(textMain);
         agencyRows = rows.filter(r => r['Account ID'] && r['Account ID'].trim());
         allRows    = agencyRows.filter(r => r['Account ID'].trim() === accountId);
+
+        // Ad-level rows for this account
+        if (textAds) {
+          adRows = parseCSV(textAds).filter(r => r['Account ID'] && r['Account ID'].trim() === accountId);
+        }
 
         if (allRows.length === 0) {
           show('login-screen');
