@@ -230,16 +230,26 @@ function fetchAsyncResults(reportRunId, accountId, adLevel, token) {
     ).getContentText());
     Logger.log(`  ↳ ${s.async_status} ${s.async_percent_completion || 0}%`);
     if (s.async_status === 'Job Completed') {
-      const d = JSON.parse(UrlFetchApp.fetch(
-        `https://graph.facebook.com/${META_VERSION}/${reportRunId}/insights?limit=500&access_token=${token}`,
-        { muteHttpExceptions: true }
-      ).getContentText());
-      return parseRows(accountId, d.data || [], adLevel);
+      return fetchAsyncPages(reportRunId, accountId, adLevel, token);
     }
     if (s.async_status === 'Job Failed') { Logger.log(`❌ Job falló: ${accountId}`); return []; }
   }
   Logger.log(`⏰ Timeout: ${accountId}`);
   return [];
+}
+
+function fetchAsyncPages(reportRunId, accountId, adLevel, token) {
+  const allData = [];
+  let url = `https://graph.facebook.com/${META_VERSION}/${reportRunId}/insights?limit=100&access_token=${token}`;
+  while (url) {
+    const res  = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+    const json = JSON.parse(res.getContentText());
+    if (json.error) { Logger.log(`❌ paginación ${accountId}: ${json.error.message}`); break; }
+    allData.push(...(json.data || []));
+    url = json.paging && json.paging.next ? json.paging.next : null;
+    if (url) Utilities.sleep(500);
+  }
+  return parseRows(accountId, allData, adLevel);
 }
 
 function parseRows(accountId, data, adLevel) {
@@ -269,22 +279,30 @@ function getVal(arr, type) {
   return f ? parseFloat(f.value) : 0;
 }
 
-// ─── Trae instagram_permalink_url por ad_id ───────────────────────────────────
+// ─── Trae instagram_permalink_url por ad_id (con paginación) ─────────────────
 function fetchAdCreatives(accountId, token) {
   try {
-    const url = `https://graph.facebook.com/${META_VERSION}/act_${accountId}/ads`
-      + `?fields=id,creative{instagram_permalink_url}&limit=500&access_token=${token}`;
-    const res  = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
-    const json = JSON.parse(res.getContentText());
-    if (json.error) {
-      Logger.log(`⚠️ creatives/${accountId}: ${json.error.message}`);
-      return {};
-    }
+    const fields    = encodeURIComponent('id,creative{instagram_permalink_url}');
+    const filtering = encodeURIComponent(JSON.stringify([{"field":"ad.effective_status","operator":"IN","value":["ACTIVE","PAUSED"]}]));
+    let url = `https://graph.facebook.com/${META_VERSION}/act_${accountId}/ads`
+      + `?fields=${fields}&filtering=${filtering}&limit=500&access_token=${token}`;
+
     const map = {};
-    (json.data || []).forEach(ad => {
-      const permalink = ad.creative && ad.creative.instagram_permalink_url;
-      if (permalink) map[String(ad.id)] = permalink;
-    });
+    while (url) {
+      const res  = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+      const json = JSON.parse(res.getContentText());
+      if (json.error) {
+        Logger.log(`⚠️ creatives/${accountId}: ${json.error.message}`);
+        break;
+      }
+      (json.data || []).forEach(ad => {
+        const permalink = ad.creative && ad.creative.instagram_permalink_url;
+        if (permalink) map[String(ad.id)] = permalink;
+      });
+      url = json.paging && json.paging.next ? json.paging.next : null;
+      if (url) Utilities.sleep(500);
+    }
+
     Logger.log(`  ↳ creatives/${accountId}: ${Object.keys(map).length} permalinks`);
     return map;
   } catch(e) {
