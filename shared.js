@@ -75,10 +75,16 @@ function validateColumns(headers) {
 function parseNumber(str) {
   if (!str) return 0;
   const clean = str.replace(/"/g, '').trim();
+  // tiene punto Y coma → punto es separador de miles, coma es decimal
   if (clean.includes('.') && clean.includes(','))
     return parseFloat(clean.replace(/\./g, '').replace(',', '.')) || 0;
+  // tiene solo coma → coma es decimal
   if (clean.includes(',') && !clean.includes('.'))
     return parseFloat(clean.replace(',', '.')) || 0;
+  // tiene solo punto → si hay exactamente 3 dígitos después del punto, es separador de miles
+  // ej: "37.911" → 37911, "1.220.163" → ya no llega acá (tiene dos puntos)
+  if (clean.includes('.') && /^\d+\.\d{3}$/.test(clean))
+    return parseFloat(clean.replace('.', '')) || 0;
   const result = parseFloat(clean) || 0;
   return isFinite(result) ? result : 0;
 }

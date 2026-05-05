@@ -450,16 +450,17 @@
     // ─── Helpers ──────────────────────────────────────────────────────────────
     function parseNumber(str) {
       if (!str) return 0;
-      // Handles "32987,09" → 32987.09 and "1,17" → 1.17
       const clean = str.replace(/"/g, '').trim();
-      // If there's a dot AND a comma, dot is thousands separator
-      if (clean.includes('.') && clean.includes(',')) {
+      // tiene punto Y coma → punto es separador de miles, coma es decimal
+      if (clean.includes('.') && clean.includes(','))
         return parseFloat(clean.replace(/\./g, '').replace(',', '.')) || 0;
-      }
-      // If only comma, it's decimal separator
-      if (clean.includes(',') && !clean.includes('.')) {
+      // tiene solo coma → coma es decimal
+      if (clean.includes(',') && !clean.includes('.'))
         return parseFloat(clean.replace(',', '.')) || 0;
-      }
+      // tiene solo punto con exactamente 3 dígitos → separador de miles
+      // ej: "37.911" → 37911
+      if (clean.includes('.') && /^\d+\.\d{3}$/.test(clean))
+        return parseFloat(clean.replace('.', '')) || 0;
       return parseFloat(clean) || 0;
     }
 
