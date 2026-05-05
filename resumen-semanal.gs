@@ -69,8 +69,10 @@ function enviarResumenSemanal() {
     const accountId = String(client['account_id'] || '').trim();
     const email     = String(client['email'] || '').trim();
     const nombre    = String(client['nombre'] || '').trim();
+    const status    = String(client['status'] || '').trim().toLowerCase();
 
     if (!accountId || !email) return;
+    if (status === 'inactiva') return;
 
     // Datos del mes para esta cuenta
     const rows = monthRows.filter(r => String(r['Account ID']).trim() === accountId);
