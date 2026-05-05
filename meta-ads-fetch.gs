@@ -1,11 +1,13 @@
 // ─── META ADS → GOOGLE SHEETS ────────────────────────────────────────────────
 const META_VERSION   = 'v25.0';
-const SHEET_CRUDO    = 'crudo';
-const SHEET_CUENTAS  = 'cuentas';
-const SHEET_MENSUAL  = 'mensual-cuentas';
-const SHEET_ANUNCIOS = 'anuncios-mes';
-const LOOKBACK_DAYS  = 60;  // días rolling para crudo
-const ANUNCIOS_DAYS  = 60;  // días para anuncios-mes
+const SHEET_CRUDO      = 'crudo';
+const SHEET_CUENTAS    = 'cuentas';
+const SHEET_MENSUAL    = 'mensual-cuentas';
+const SHEET_ANUNCIOS   = 'anuncios-mes';
+const SHEET_CAMPAÑAS   = 'crudo-campanas';
+const LOOKBACK_DAYS    = 60;  // días rolling para crudo
+const ANUNCIOS_DAYS    = 60;  // días para anuncios-mes
+const CAMPANAS_DAYS    = 60;  // días para crudo-campanas
 
 // ─── Corre todo junto (para el trigger diario) ────────────────────────────────
 function fetchAll() {
@@ -338,4 +340,115 @@ function fetchAdCreatives(accountId, token) {
     Logger.log(`⚠️ creatives/${accountId}: ${e.message}`);
     return {};
   }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// 5. CRUDO-CAMPANAS — diario por campaña (últimos CAMPANAS_DAYS días)
+// ═══════════════════════════════════════════════════════════════════════════════
+function fetchCrudoCampanas() {
+  const token = PropertiesService.getScriptProperties().getProperty('META_ACCESS_TOKEN');
+  if (!token) throw new Error('Falta META_ACCESS_TOKEN');
+
+  const accountIds = getActiveAccounts();
+  if (!accountIds.length) { Logger.log('⚠️ No hay cuentas activas'); return; }
+  Logger.log(`📋 crudo-campanas: ${accountIds.length} cuentas...`);
+
+  const ss    = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName(SHEET_CAMPAÑAS) || ss.insertSheet(SHEET_CAMPAÑAS);
+
+  const HEADERS = ['Account ID','Date','Campaign Objective','Amount Spent',
+    'Website Purchases Conversion Value','Website Purchases'];
+  if (sheet.getRange(1,1).getValue() !== 'Account ID')
+    sheet.getRange(1,1,1,HEADERS.length).setValues([HEADERS]);
+
+  const today    = new Date();
+  const since    = new Date(today); since.setDate(since.getDate() - CAMPANAS_DAYS);
+  const sinceStr = Utilities.formatDate(since, 'UTC', 'yyyy-MM-dd');
+  const untilStr = Utilities.formatDate(today, 'UTC', 'yyyy-MM-dd');
+
+  // Dedup por account_id + date + objective
+  const existing = new Set(
+    sheet.getDataRange().getValues().slice(1)
+      .filter(r => r[0]).map(r => {
+        const d = r[1] instanceof Date ? Utilities.formatDate(r[1], 'UTC', 'yyyy-MM-dd') : String(r[1]).slice(0, 10);
+        return `${r[0]}_${d}_${r[2]}`;
+      })
+  );
+
+  let added = 0, errors = 0;
+  const newRows = [];
+
+  for (const id of accountIds) {
+    try {
+      const url = `https://graph.facebook.com/${META_VERSION}/act_${id}/insights`;
+      const payload = {
+        fields: 'account_id,campaign_id,campaign_name,objective,spend,actions,action_values',
+        time_range: JSON.stringify({ since: sinceStr, until: untilStr }),
+        time_increment: '1',
+        level: 'campaign',
+        limit: '200',
+        access_token: token
+      };
+      const res  = UrlFetchApp.fetch(url, { method: 'post', payload: payload, muteHttpExceptions: true });
+      const json = JSON.parse(res.getContentText());
+
+      if (json.error) { Logger.log(`❌ ${id}: ${json.error.message}`); errors++; Utilities.sleep(2000); continue; }
+
+      const data = json.report_run_id
+        ? fetchAsyncPagesRaw(json.report_run_id, id, token)
+        : (json.data || []);
+
+      for (const d of data) {
+        const objective = String(d.objective || '').trim();
+        const date      = d.date_start;
+        const key       = `${id}_${date}_${objective}`;
+        if (existing.has(key)) continue;
+        newRows.push([
+          id, date, objective,
+          parseFloat(d.spend || 0),
+          getVal(d.action_values, 'omni_purchase') || getVal(d.action_values, 'purchase'),
+          getVal(d.actions, 'omni_purchase') || getVal(d.actions, 'purchase')
+        ]);
+        existing.add(key);
+      }
+      Utilities.sleep(1000);
+    } catch(e) {
+      Logger.log(`⚠️ campanas/${id}: ${e.message}`); errors++;
+      Utilities.sleep(2000);
+    }
+  }
+
+  if (newRows.length)
+    sheet.getRange(sheet.getLastRow()+1, 1, newRows.length, HEADERS.length).setValues(newRows);
+
+  Logger.log(`✅ crudo-campanas: ${newRows.length} filas nuevas | ⚠️ ${errors} errores`);
+}
+
+// Helper: igual que fetchAsyncPages pero devuelve data cruda sin parsear
+function fetchAsyncPagesRaw(reportRunId, accountId, token) {
+  const MAX = 25, POLL = 8000;
+  for (let i = 0; i < MAX; i++) {
+    Utilities.sleep(POLL);
+    const s = JSON.parse(UrlFetchApp.fetch(
+      `https://graph.facebook.com/${META_VERSION}/${reportRunId}?access_token=${token}`,
+      { muteHttpExceptions: true }
+    ).getContentText());
+    Logger.log(`  ↳ ${s.async_status} ${s.async_percent_completion || 0}%`);
+    if (s.async_status === 'Job Completed') {
+      const allData = [];
+      let url = `https://graph.facebook.com/${META_VERSION}/${reportRunId}/insights?limit=200&access_token=${token}`;
+      while (url) {
+        const res  = UrlFetchApp.fetch(url, { muteHttpExceptions: true });
+        const json = JSON.parse(res.getContentText());
+        if (json.error) { Logger.log(`❌ paginación ${accountId}: ${json.error.message}`); break; }
+        allData.push(...(json.data || []));
+        url = json.paging && json.paging.next ? json.paging.next : null;
+        if (url) Utilities.sleep(500);
+      }
+      return allData;
+    }
+    if (s.async_status === 'Job Failed') { Logger.log(`❌ Job falló: ${accountId}`); return []; }
+  }
+  Logger.log(`⏰ Timeout: ${accountId}`);
+  return [];
 }

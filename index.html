@@ -439,10 +439,11 @@
     }
 
     // ─── State ────────────────────────────────────────────────────────────────
-    let allRows     = [];
-    let agencyRows  = [];
-    let targetsRows = [];
-    let adRows      = [];
+    let allRows      = [];
+    let agencyRows   = [];
+    let targetsRows  = [];
+    let adRows       = [];
+    let campaignRows = [];
     let currentAccountId = null;
     let currentPeriod = 'this_month';
     let chart = null;
@@ -870,9 +871,10 @@
       // Ads table — usa anuncios-mes filtrado por período
       const filteredAds = filterAdsByPeriod(adRows, currentPeriod);
       const ads = aggregateByAd(filteredAds, exchangeRate);
-      // Resultados por objetivo de campaña
-      const salesRows  = filtered.filter(r => (r['Campaign Objective'] || '').trim() === 'OUTCOME_SALES');
-      const otherRows  = filtered.filter(r => (r['Campaign Objective'] || '').trim() !== 'OUTCOME_SALES');
+      // Resultados por objetivo de campaña (usa crudo-campanas)
+      const filteredCamp = filterByPeriod(campaignRows, currentPeriod);
+      const salesRows    = filteredCamp.filter(r => (r['Campaign Objective'] || '').trim() === 'OUTCOME_SALES');
+      const otherRows    = filteredCamp.filter(r => (r['Campaign Objective'] || '').trim() !== 'OUTCOME_SALES');
 
       function calcGroup(rows) {
         const spent = rows.reduce((s, r) => s + parseNumber(r['Amount Spent']), 0) * exchangeRate;
@@ -943,7 +945,7 @@
     async function loadData(accountId) {
       show('loading-screen');
       try {
-        const { main: textMain, targets: textTargets, clients: textClients, ads: textAds } = await fetchAllSheets();
+        const { main: textMain, targets: textTargets, clients: textClients, ads: textAds, campaigns: textCampaigns } = await fetchAllSheets();
 
         const rows = parseCSV(textMain);
         agencyRows = rows.filter(r => r['Account ID'] && r['Account ID'].trim());
@@ -952,6 +954,11 @@
         // Ad-level rows for this account
         if (textAds) {
           adRows = parseCSV(textAds).filter(r => r['Account ID'] && r['Account ID'].trim() === accountId);
+        }
+
+        // Campaign-level rows for this account
+        if (textCampaigns) {
+          campaignRows = parseCSV(textCampaigns).filter(r => r['Account ID'] && r['Account ID'].trim() === accountId);
         }
 
         if (allRows.length === 0) {
