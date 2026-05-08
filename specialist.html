@@ -371,7 +371,6 @@
       const clicks    = rows.reduce((s, r) => s + parseNumber(r['Inline Link Clicks']), 0);
       const purchases = rows.reduce((s, r) => s + parseNumber(r['Website Purchases']), 0);
       const lpviews   = rows.reduce((s, r) => s + parseNumber(r['Landing Page Views']), 0);
-      const cpm     = impr > 0    ? (rawSpent / impr) * 1000    : 0;
       const hook    = impr > 0    ? (views3s / impr) * 100      : 0;
       const ctr     = impr > 0    ? (lpviews / impr) * 100       : 0;
       const webconv = lpviews > 0 ? (purchases / lpviews) * 100 : 0;
@@ -400,6 +399,7 @@
       // Aplicar tipo de cambio a valores monetarios (ROAS no se convierte, es ratio)
       const spent   = rawSpent * exchangeRate;
       const conv    = rawConv  * exchangeRate;
+      const cpm     = impr > 0    ? (spent / impr) * 1000    : 0;  // usa spent (ya convertido)
       const roas    = rawSpent > 0 ? rawConv / rawSpent : 0; // ratio: no necesita conversión
       spentObj      = spentObj * exchangeRate;
       convObj       = convObj  * exchangeRate;
