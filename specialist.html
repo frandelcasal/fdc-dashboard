@@ -313,7 +313,7 @@
                 T. Gancho <span class="sort-icon-2">↕</span>
               </th>
               <th class="sort-th-2 text-right pb-3 pr-4 font-normal cursor-pointer select-none" data-col="ctr">
-                CTR <span class="sort-icon-2">↕</span>
+                Vis / Imp <span class="sort-icon-2">↕</span>
               </th>
               <th class="sort-th-2 text-right pb-3 font-normal cursor-pointer select-none" data-col="webconv">
                 T. Conv. <span class="sort-icon-2">↕</span>
@@ -373,7 +373,7 @@
       const lpviews   = rows.reduce((s, r) => s + parseNumber(r['Landing Page Views']), 0);
       const cpm     = impr > 0    ? (rawSpent / impr) * 1000    : 0;
       const hook    = impr > 0    ? (views3s / impr) * 100      : 0;
-      const ctr     = impr > 0    ? (clicks / impr) * 100       : 0;
+      const ctr     = impr > 0    ? (lpviews / impr) * 100       : 0;
       const webconv = lpviews > 0 ? (purchases / lpviews) * 100 : 0;
 
       let roasObj    = 0;
@@ -665,7 +665,7 @@
       const agencyAvgs  = {
         cpm:     agImpr > 0    ? (agSpent / agImpr) * 1000       : 0,
         hook:    agImpr > 0    ? (ag3s / agImpr) * 100           : 0,
-        ctr:     agImpr > 0    ? (agClicks / agImpr) * 100       : 0,
+        ctr:     agImpr > 0    ? (agLPViews / agImpr) * 100      : 0,
         webconv: agLPViews > 0 ? (agPurchases / agLPViews) * 100 : 0,
       };
 

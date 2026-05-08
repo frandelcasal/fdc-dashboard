@@ -340,7 +340,7 @@
       </div>
 
       <div class="card-sm p-5" style="transform:rotate(-0.4deg)">
-        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">🖱️ CTR</p>
+        <p class="text-xs uppercase font-bold tracking-wider mb-1" style="color:#888">🎯 Visitas / Impresiones</p>
         <p id="kpi-ctr" class="metric-value text-2xl font-bold" style="color:var(--ink)">—</p>
         <div id="kpi-ctr-vs" style="display:none" class="mt-2 flex items-center gap-1 flex-wrap">
           <span class="text-xs" style="color:#aaa">Prom. agencia: <span id="kpi-ctr-agency"></span></span>
@@ -706,7 +706,7 @@
 
       const cpm     = totalImpressions > 0 ? (totalSpent / totalImpressions) * 1000 : 0;
       const hook    = totalImpressions > 0 ? (total3sViews / totalImpressions) * 100 : 0;
-      const ctr     = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
+      const ctr     = totalImpressions > 0 ? (totalLPViews / totalImpressions) * 100 : 0;
       const webconv = totalLPViews > 0     ? (totalPurchases / totalLPViews) * 100 : 0;
 
       const cpa    = totalPurchases > 0 ? totalSpent / totalPurchases : 0;
@@ -735,7 +735,7 @@
       const agLPViews    = agFiltered.reduce((s, r) => s + parseNumber(r['Landing Page Views']), 0);
       const agCpm        = agImpr > 0    ? (agSpent / agImpr) * 1000       : 0;
       const agHook       = agImpr > 0    ? (ag3s / agImpr) * 100           : 0;
-      const agCtr        = agImpr > 0    ? (agClicks / agImpr) * 100       : 0;
+      const agCtr        = agImpr > 0    ? (agLPViews / agImpr) * 100       : 0;
       const agWebconv    = agLPViews > 0 ? (agPurchases / agLPViews) * 100 : 0;
 
       function setVs(id, clientVal, agencyVal, fmtFn, higherIsBetter = true) {

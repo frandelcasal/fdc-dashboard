@@ -8,6 +8,7 @@ const SHEET_CAMPAÑAS   = 'crudo-campanas';
 const LOOKBACK_DAYS    = 60;  // días rolling para crudo
 const ANUNCIOS_DAYS    = 60;  // días para anuncios-mes
 const CAMPANAS_DAYS    = 60;  // días para crudo-campanas
+const REFRESH_DAYS     = 7;   // últimos N días que siempre se re-fetchean (Meta actualiza atribución)
 
 // ─── Corre todo junto (para el trigger diario) ────────────────────────────────
 function fetchAll() {
@@ -52,15 +53,27 @@ function fetchMetaAds() {
   const sinceStr = Utilities.formatDate(since, 'UTC', 'yyyy-MM-dd');
   const untilStr = Utilities.formatDate(today, 'UTC', 'yyyy-MM-dd');
 
-  const existing = new Set(
-    sheet.getDataRange().getValues().slice(1)
-      .filter(r => r[0]).map(r => {
-        const d = r[1] instanceof Date ? Utilities.formatDate(r[1], 'UTC', 'yyyy-MM-dd') : String(r[1]).slice(0, 10);
-        return `${r[0]}_${d}`;
-      })
-  );
+  // Filas más recientes que este cutoff se descartan y se re-fetchean siempre
+  const refreshCutoff = new Date(today);
+  refreshCutoff.setDate(refreshCutoff.getDate() - REFRESH_DAYS);
+  const refreshCutoffStr = Utilities.formatDate(refreshCutoff, 'UTC', 'yyyy-MM-dd');
 
-  let added = 0, errors = 0;
+  // Conservar solo filas más viejas que el cutoff (y con fecha válida)
+  const allData = sheet.getDataRange().getValues();
+  const oldRows = allData.slice(1).filter(r => {
+    if (!r[0]) return false;
+    const d = r[1] instanceof Date ? Utilities.formatDate(r[1], 'UTC', 'yyyy-MM-dd') : String(r[1]).slice(0, 10);
+    if (!d || d.length < 10) return false;  // descartar filas sin fecha válida
+    return d < refreshCutoffStr;
+  });
+
+  // Dedup solo con filas viejas (las recientes siempre se re-fetchean)
+  const existing = new Set(oldRows.map(r => {
+    const d = r[1] instanceof Date ? Utilities.formatDate(r[1], 'UTC', 'yyyy-MM-dd') : String(r[1]).slice(0, 10);
+    return `${r[0]}_${d}`;
+  }));
+
+  let errors = 0;
   const newRows = [];
 
   for (const id of accountIds) {
@@ -77,11 +90,11 @@ function fetchMetaAds() {
     }
   }
 
-  if (newRows.length) {
-    sheet.getRange(sheet.getLastRow()+1, 1, newRows.length, HEADERS.length).setValues(newRows);
-    added = newRows.length;
-  }
-  Logger.log(`✅ crudo: ${added} filas nuevas | ⚠️ ${errors} errores`);
+  // Reescribir sheet: historial viejo + filas nuevas/actualizadas
+  sheet.clearContents();
+  const toWrite = [HEADERS, ...oldRows, ...newRows];
+  sheet.getRange(1, 1, toWrite.length, HEADERS.length).setValues(toWrite);
+  Logger.log(`✅ crudo: ${newRows.length} filas nuevas/actualizadas | ⚠️ ${errors} errores`);
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -366,16 +379,27 @@ function fetchCrudoCampanas() {
   const sinceStr = Utilities.formatDate(since, 'UTC', 'yyyy-MM-dd');
   const untilStr = Utilities.formatDate(today, 'UTC', 'yyyy-MM-dd');
 
-  // Dedup por account_id + date + objective
-  const existing = new Set(
-    sheet.getDataRange().getValues().slice(1)
-      .filter(r => r[0]).map(r => {
-        const d = r[1] instanceof Date ? Utilities.formatDate(r[1], 'UTC', 'yyyy-MM-dd') : String(r[1]).slice(0, 10);
-        return `${r[0]}_${d}_${r[2]}`;
-      })
-  );
+  // Filas más recientes que este cutoff se descartan y se re-fetchean siempre
+  const refreshCutoff = new Date(today);
+  refreshCutoff.setDate(refreshCutoff.getDate() - REFRESH_DAYS);
+  const refreshCutoffStr = Utilities.formatDate(refreshCutoff, 'UTC', 'yyyy-MM-dd');
 
-  let added = 0, errors = 0;
+  // Conservar solo filas más viejas que el cutoff (y con fecha válida)
+  const allData = sheet.getDataRange().getValues();
+  const oldRows = allData.slice(1).filter(r => {
+    if (!r[0]) return false;
+    const d = r[1] instanceof Date ? Utilities.formatDate(r[1], 'UTC', 'yyyy-MM-dd') : String(r[1]).slice(0, 10);
+    if (!d || d.length < 10) return false;  // descartar filas sin fecha válida
+    return d < refreshCutoffStr;
+  });
+
+  // Dedup por account_id + date + objective, solo con filas viejas
+  const existing = new Set(oldRows.map(r => {
+    const d = r[1] instanceof Date ? Utilities.formatDate(r[1], 'UTC', 'yyyy-MM-dd') : String(r[1]).slice(0, 10);
+    return `${r[0]}_${d}_${r[2]}`;
+  }));
+
+  let errors = 0;
   const newRows = [];
 
   for (const id of accountIds) {
@@ -418,10 +442,11 @@ function fetchCrudoCampanas() {
     }
   }
 
-  if (newRows.length)
-    sheet.getRange(sheet.getLastRow()+1, 1, newRows.length, HEADERS.length).setValues(newRows);
-
-  Logger.log(`✅ crudo-campanas: ${newRows.length} filas nuevas | ⚠️ ${errors} errores`);
+  // Reescribir sheet: historial viejo + filas nuevas/actualizadas
+  sheet.clearContents();
+  const toWrite = [HEADERS, ...oldRows, ...newRows];
+  sheet.getRange(1, 1, toWrite.length, HEADERS.length).setValues(toWrite);
+  Logger.log(`✅ crudo-campanas: ${newRows.length} filas nuevas/actualizadas | ⚠️ ${errors} errores`);
 }
 
 // Helper: igual que fetchAsyncPages pero devuelve data cruda sin parsear
