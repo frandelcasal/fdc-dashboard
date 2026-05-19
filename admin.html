@@ -440,9 +440,12 @@
         return avgObj > 0 ? +((avgRoas - avgObj) / avgObj * 100).toFixed(2) : null;
       });
 
-      const labels = allMonths.map(ym => {
-        const [, m] = ym.split('-').map(Number);
-        return `${monthNames[m - 1]}`;
+      const labels = allMonths.map((ym, i) => {
+        const [y, m] = ym.split('-').map(Number);
+        const name = monthNames[m - 1];
+        // Mostrar año en enero o cuando cambia el año respecto al mes anterior
+        const prevYear = i > 0 ? Number(allMonths[i - 1].split('-')[0]) : null;
+        return (i === 0 || y !== prevYear) ? `${name} '${String(y).slice(2)}` : name;
       });
 
       return { labels, allSpecialists, specLines, agencyLine };
