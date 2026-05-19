@@ -385,10 +385,11 @@
     function buildMonthlyChartData() {
       const monthNames = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
 
-      // All unique YYYY-MM months present in the data
+      // All unique YYYY-MM months present in the data, desde enero del año actual
+      const currentYear = new Date().getFullYear();
       const allMonths = [...new Set(
         allRows.map(r => r['Date'] && r['Date'].substring(0, 7)).filter(Boolean)
-      )].sort();
+      )].sort().filter(ym => Number(ym.split('-')[0]) >= currentYear);
 
       // For each month, aggregate per account → join with targets → group by specialist
       const monthData = {}; // YYYY-MM → { sp → [{ conv, spent, obj }] }
